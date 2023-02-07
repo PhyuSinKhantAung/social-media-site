@@ -1,8 +1,8 @@
 const router = require('express').Router();
-const productRouter = require('./routes/product.route');
+const postRouter = require('./routes/post.route');
 const authRouter = require('./routes/auth.route');
 
 router.use('/auth', authRouter);
-router.use('/products', productRouter);
+router.use('/posts', postRouter);
 
 module.exports = router;

@@ -10,8 +10,8 @@ const authenticate = catchAsync(async (req, res, next) => {
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
   ) {
+    // eslint-disable-next-line no-unused-vars
     const [bearer, jwtToken] = req.headers.authorization.split(' ');
-    // token = req.headers.authorization.split(' ')[1];
     token = jwtToken;
   } else if (req.cookies.jwt) {
     token = req.cookies.jwt;
@@ -25,11 +25,11 @@ const authenticate = catchAsync(async (req, res, next) => {
 
   try {
     const payload = jwt.verify(token, JWT_SECRET);
-    console.log(payload);
     const user = await User.findById(payload.id);
     if (!user)
       throw new ApiError('User belong to this id does not exist.', 400);
     req.user = user;
+    next();
   } catch (err) {
     next(err);
   }
