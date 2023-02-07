@@ -10,6 +10,15 @@ exports.getAllposts = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.getAllMyPosts = catchAsync(async (req, res, next) => {
+  const posts = await postService.getAllMyPosts(req.user);
+  res.status(200).json({
+    code: 200,
+    data: posts,
+    count: posts.length,
+  });
+});
+
 exports.createPost = catchAsync(async (req, res, next) => {
   const post = await postService.createPost(req.body, req.user);
   res.status(200).json({

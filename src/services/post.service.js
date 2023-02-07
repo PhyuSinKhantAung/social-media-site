@@ -5,6 +5,10 @@ const postService = {
     const posts = await Post.find();
     return posts;
   },
+  getAllMyPosts: async (reqUser) => {
+    const posts = await Post.find({ user: reqUser.id });
+    return posts;
+  },
   createPost: async (reqBody, reqUser) => {
     reqBody.user = reqUser.id;
     const post = await (
