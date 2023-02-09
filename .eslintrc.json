@@ -15,6 +15,7 @@
     "class-methods-use-this": "off",
     "import/no-extraneous-dependencies": "off",
     "react/forbid-prop-types": "off",
+    "node/no-extraneous-require": "off",
     "no-unused-vars": [
       "warn",
       { "argsIgnorePattern": "req|next|err|error|res" }

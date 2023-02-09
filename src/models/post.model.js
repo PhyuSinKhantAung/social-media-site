@@ -24,7 +24,6 @@ const postSchema = new Schema(
           ref: 'User',
         },
         text: String,
-        default: [],
       },
     ],
     tags: [
@@ -49,9 +48,15 @@ postSchema.virtual('comment_count').get(function () {
   return this.comments.length;
 });
 
+postSchema.virtual('like_count').get(function () {
+  return this.likes.length;
+});
+
 postSchema.pre('save', function (next) {
-  if (!this.isModified('comments') || this.isNew) next();
+  if (this.isNew) next();
   this.comment_count = this.comments.length;
+  this.like_count = this.likes.length;
+
   return next;
 });
 
