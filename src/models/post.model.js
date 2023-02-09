@@ -33,13 +33,7 @@ const postSchema = new Schema(
     //     default: [],
     //   },
     // ],
-    friends: [
-      {
-        type: mongoose.Schema.ObjectId,
-        ref: 'User',
-        default: [],
-      },
-    ],
+
     user: {
       type: mongoose.Schema.ObjectId,
       ref: 'User',

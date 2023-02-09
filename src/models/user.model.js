@@ -1,4 +1,4 @@
-const { Schema, model } = require('mongoose');
+const { Schema, model, default: mongoose } = require('mongoose');
 
 const bcrypt = require('bcryptjs');
 
@@ -26,6 +26,20 @@ const userSchema = new Schema(
       filename: String,
       url: String,
     },
+    friends: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+        default: [],
+      },
+    ],
+    blocks: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+        default: [],
+      },
+    ],
     otp: {
       type: String,
       select: false,
