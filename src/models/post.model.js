@@ -26,7 +26,14 @@ const postSchema = new Schema(
         text: String,
       },
     ],
-    tags: [
+    // tags: [
+    //   {
+    //     type: mongoose.Schema.ObjectId,
+    //     ref: 'User',
+    //     default: [],
+    //   },
+    // ],
+    friends: [
       {
         type: mongoose.Schema.ObjectId,
         ref: 'User',
@@ -36,6 +43,10 @@ const postSchema = new Schema(
     user: {
       type: mongoose.Schema.ObjectId,
       ref: 'User',
+    },
+    audience: {
+      type: String,
+      default: 'friend',
     },
   },
   {
