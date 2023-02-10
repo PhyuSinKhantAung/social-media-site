@@ -26,7 +26,7 @@ const userSchemas = {
       })
       .options({ convert: true })
       .required(),
-    sex: Joi.string().valid('male', 'female'),
+    gender: Joi.string().valid('male', 'female'),
   })
     .xor('phone', 'email')
     .messages({
