@@ -37,14 +37,16 @@ const postSchema = new Schema(
       type: mongoose.Schema.ObjectId,
       ref: 'User',
     },
-    // audience: {
-    //   type: String,
-    //   default: 'friend',
-    // },
+    audience: {
+      type: String,
+      enum: ['PUBLIC', 'FRIEND'],
+      default: 'PUBLIC',
+    },
   },
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
+    timestamps: true,
   }
 );
 
@@ -62,6 +64,14 @@ postSchema.pre('save', function (next) {
   this.like_count = this.likes.length;
 
   return next;
+});
+
+postSchema.pre(/^find/, function (next) {
+  this.populate({ path: 'user', select: 'name profile_pic' }).populate({
+    path: 'taggedUserIds',
+    select: 'name profile_pic',
+  });
+  next();
 });
 
 const Post = model('Post', postSchema);

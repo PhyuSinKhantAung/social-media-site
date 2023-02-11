@@ -7,8 +7,12 @@ const postSchema = require('../schemas/post.schema');
 const commentRoute = require('./comment.route');
 const likeRoute = require('./like.route');
 
-route.get('/', postController.getAllposts);
+route.get('/', authenticate, postController.getAllposts);
 route.get('/me', authenticate, postController.getAllMyPosts);
+
+route.get('/:id', authenticate, postController.getPost);
+route.delete('/:id', authenticate, postController.deletePost);
+
 route.post(
   '/',
   authenticate,
@@ -16,11 +20,16 @@ route.post(
   uploadImages,
   postController.createPost
 );
-route.get('/:id', authenticate, postController.getPost);
-route.patch('/:id', authenticate, uploadImages, postController.updatePost);
-// route.put('/:id', authenticate, uploadImages, postController.deleteImages);
 
-route.delete('/:id', authenticate, postController.deletePost);
+route.patch(
+  '/:id',
+  authenticate,
+  validation(postSchema.createPostSchema),
+  uploadImages,
+  postController.updatePost
+);
+
+route.put('/:id', authenticate, uploadImages, postController.deleteImages);
 
 // comments
 route.use('/:id/comments', commentRoute);

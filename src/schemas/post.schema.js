@@ -8,7 +8,7 @@ const postSchema = {
       .items(
         Joi.string()
           .length(24)
-          .messages({ 'string.length': 'Tagged user id is invalid' })
+          .messages({ 'string.length': 'Tagged user id is invalid.' })
           .hex()
       )
       .unique()

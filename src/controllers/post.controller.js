@@ -2,7 +2,7 @@ const postService = require('../services/post.service');
 const catchAsync = require('../utilities/catchAsync');
 
 exports.getAllposts = catchAsync(async (req, res, next) => {
-  const posts = await postService.getAllposts();
+  const posts = await postService.getAllposts(req.query);
   res.status(200).json({
     code: 200,
     data: posts,
@@ -11,7 +11,7 @@ exports.getAllposts = catchAsync(async (req, res, next) => {
 });
 
 exports.getAllMyPosts = catchAsync(async (req, res, next) => {
-  const posts = await postService.getAllMyPosts(req.user);
+  const posts = await postService.getAllMyPosts(req.user, req.query);
   res.status(200).json({
     code: 200,
     data: posts,
@@ -28,7 +28,12 @@ exports.createPost = catchAsync(async (req, res, next) => {
 });
 
 exports.updatePost = catchAsync(async (req, res, next) => {
-  const post = await postService.updatePost(req.body, req.params.id, req.files);
+  const post = await postService.updatePost(
+    req.body,
+    req.user,
+    req.params.id,
+    req.files
+  );
   res.status(200).json({
     code: 200,
     data: post,
@@ -36,14 +41,13 @@ exports.updatePost = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteImages = catchAsync(async (req, res, next) => {
-  const post = await postService.deleteImages(
+  const deletedImgPost = await postService.deleteImages(
     req.body,
-    req.params.id,
-    req.files
+    req.params.id
   );
   res.status(200).json({
     code: 200,
-    data: post,
+    data: deletedImgPost,
   });
 });
 
