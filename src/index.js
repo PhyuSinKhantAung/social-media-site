@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const postRouter = require('./routes/post.route');
 const authRouter = require('./routes/auth.route');
+
 const friendRouter = require('./routes/friend.route');
 
 router.use('/auth', authRouter);

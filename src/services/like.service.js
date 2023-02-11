@@ -1,5 +1,5 @@
 const { ObjectId } = require('mongodb');
-const { NotFoundError, BadRequestError, ApiError } = require('../errors');
+const { BadRequestError, ApiError } = require('../errors');
 
 const Post = require('../models/post.model');
 
@@ -15,19 +15,8 @@ const likeService = {
         runValidators: true,
       }
     );
-    // console.log(post.likes);
-    // console.log(userId);
-    // const isLiked = post.likes.find((id) => id.toString() === userId);
-    // console.log(typeof isLiked);
-    // console.log(isLiked);
-    // if (isLiked) {
-    //   const unlikedPost = await Post.findByIdAndUpdate(postId, {
-    //     $pull: { likes: { $in: [isLiked] } },
-    //   });
-    //   console.log('====>', unlikedPost);
-    //   return unlikedPost;
-    // }
-
+    if (!post)
+      throw new BadRequestError('The post with that id does not exist.', 400);
     return post;
   },
   unlike: async (postId, userId) => {
@@ -43,6 +32,16 @@ const likeService = {
         400
       );
     }
+    return await Post.findById(postId);
+  },
+  getAllLikes: async (postId) => {
+    const post = await Post.findById(postId).populate({
+      path: 'likes',
+      select: 'name profile_pic',
+    });
+    if (!post)
+      throw new BadRequestError('The post with that id does not exist.', 400);
+    return post.likes;
   },
 };
 
