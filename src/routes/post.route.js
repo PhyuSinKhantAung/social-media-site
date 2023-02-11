@@ -12,7 +12,7 @@ route.get('/me', authenticate, postController.getAllMyPosts);
 route.post(
   '/',
   authenticate,
-  //   validation(postSchema.createPostSchema),
+  validation(postSchema.createPostSchema),
   uploadImages,
   postController.createPost
 );

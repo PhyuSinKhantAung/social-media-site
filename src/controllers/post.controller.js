@@ -20,7 +20,6 @@ exports.getAllMyPosts = catchAsync(async (req, res, next) => {
 });
 
 exports.createPost = catchAsync(async (req, res, next) => {
-  console.log(req.files);
   const post = await postService.createPost(req.body, req.user, req.files);
   res.status(200).json({
     code: 200,

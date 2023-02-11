@@ -5,9 +5,15 @@ const postSchema = {
     content: Joi.string(),
     images: Joi.array().items(Joi.string().uri()).optional(),
     taggedUserIds: Joi.array()
-      .items(Joi.string().length(24).hex())
+      .items(
+        Joi.string()
+          .length(24)
+          .messages({ 'string.length': 'Tagged user id is invalid' })
+          .hex()
+      )
       .unique()
-      .optional(),
+      .optional()
+      .messages({ 'array.unique': 'You cannot tag duplicate user id.' }),
   }),
 };
 
