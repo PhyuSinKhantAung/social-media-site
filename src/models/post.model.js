@@ -2,7 +2,7 @@ const { Schema, model, default: mongoose } = require('mongoose');
 
 const postSchema = new Schema(
   {
-    desc: {
+    content: {
       type: String,
     },
     images: [
@@ -26,22 +26,21 @@ const postSchema = new Schema(
         text: String,
       },
     ],
-    // tags: [
-    //   {
-    //     type: mongoose.Schema.ObjectId,
-    //     ref: 'User',
-    //     default: [],
-    //   },
-    // ],
-
+    taggedUserIds: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+        default: [],
+      },
+    ],
     user: {
       type: mongoose.Schema.ObjectId,
       ref: 'User',
     },
-    audience: {
-      type: String,
-      default: 'friend',
-    },
+    // audience: {
+    //   type: String,
+    //   default: 'friend',
+    // },
   },
   {
     toJSON: { virtuals: true },

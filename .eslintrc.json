@@ -16,6 +16,7 @@
     "import/no-extraneous-dependencies": "off",
     "react/forbid-prop-types": "off",
     "node/no-extraneous-require": "off",
+    "node/no-unsupported-features/es-syntax": "off",
     "no-unused-vars": [
       "warn",
       { "argsIgnorePattern": "req|next|err|error|res" }

@@ -16,7 +16,6 @@ const authenticate = catchAsync(async (req, res, next) => {
   } else if (req.cookies.jwt) {
     token = req.cookies.jwt;
   }
-
   if (!token)
     throw new ApiError(
       'You are not logged in. Please login to get access.',
