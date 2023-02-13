@@ -1,4 +1,3 @@
-const Share = require('../models/share.model');
 const catchAsync = require('../utilities/catchAsync');
 const shareService = require('../services/share.service');
 
@@ -30,5 +29,16 @@ exports.deleteShare = catchAsync(async (req, res, next) => {
   res.status(200).json({
     code: 200,
     data: null,
+  });
+});
+
+exports.getSharedPost = catchAsync(async (req, res, next) => {
+  const sharedPost = await shareService.getSharedPost(
+    req.params.id,
+    req.user.id
+  );
+  res.status(200).json({
+    code: 200,
+    data: sharedPost,
   });
 });

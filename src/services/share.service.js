@@ -31,6 +31,12 @@ const shareService = {
       throw new BadRequestError('There is no post with that id', 400);
     await Share.findByIdAndDelete(sharePostId);
   },
+  getSharedPost: async (sharePostId, userId) => {
+    const sharedPost = await Share.findById(sharePostId);
+    if (!sharedPost)
+      throw new BadRequestError('There is no shared post with that id', 400);
+    return sharedPost;
+  },
 };
 
 module.exports = shareService;

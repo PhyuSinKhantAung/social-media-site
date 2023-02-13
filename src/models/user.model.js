@@ -40,6 +40,13 @@ const userSchema = new Schema(
         default: [],
       },
     ],
+    saves: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'Post',
+        default: [],
+      },
+    ],
     otp: {
       type: String,
       select: false,
@@ -49,6 +56,16 @@ const userSchema = new Schema(
     timestamps: true,
   }
 );
+
+// userSchema.pre(/^findById/, function (next) {
+//   this.populate('saves');
+//   next();
+// });
+
+// userSchema.pre(/^find/, function (next) {
+//   this.populate({ path: 'saves', select: 'content images' });
+//   next();
+// });
 
 userSchema.pre('save', async function (next) {
   // if password is modified, gonna hash / if not, will go another middleware
