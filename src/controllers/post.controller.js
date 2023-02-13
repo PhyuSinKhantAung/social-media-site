@@ -26,7 +26,6 @@ exports.createPost = catchAsync(async (req, res, next) => {
     data: post,
   });
 });
-
 exports.updatePost = catchAsync(async (req, res, next) => {
   const post = await postService.updatePost(
     req.body,

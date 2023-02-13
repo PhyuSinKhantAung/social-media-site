@@ -19,7 +19,7 @@ const postSchema = new Schema(
     ],
     comments: [
       {
-        user_id: {
+        commented_by: {
           type: mongoose.Schema.ObjectId,
           ref: 'User',
         },

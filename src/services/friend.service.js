@@ -1,5 +1,4 @@
-const { ObjectId } = require('mongodb');
-const { BadRequestError } = require('../errors');
+const { BadRequestError, ApiError } = require('../errors');
 const Friend = require('../models/friend.model');
 const User = require('../models/user.model');
 
@@ -42,10 +41,15 @@ const friendService = {
       receiverId: userId,
       relationship: 'REQUEST',
     });
+    if (!friendRequests)
+      throw new BadRequestError(
+        'User id is invalid or There is no request with that id',
+        400
+      );
     return friendRequests;
   },
   confirmFriend: async (wantToConfirmId, userId) => {
-    await Friend.findOneAndUpdate(
+    const request = await Friend.findOneAndUpdate(
       {
         receiverId: userId,
         requesterId: wantToConfirmId,
@@ -54,6 +58,9 @@ const friendService = {
       { relationship: 'FRIEND' },
       { new: true }
     );
+
+    if (!request) throw new ApiError('There is no request with those ids', 400);
+
     const confirmFriend = await User.findByIdAndUpdate(
       userId,
       {
@@ -65,16 +72,28 @@ const friendService = {
   },
 
   unfriend: async (wantToUnfriId, userId) => {
-    await Friend.findOneAndDelete({
-      receiverId: userId || wantToUnfriId,
-      requesterId: wantToUnfriId || userId,
-      relationship: 'FRIEND',
+    const relation = await Friend.findOneAndDelete({
+      $or: [
+        {
+          receiverId: userId,
+          requesterId: wantToUnfriId,
+          relationship: 'FRIEND',
+        },
+        {
+          receiverId: wantToUnfriId,
+          requesterId: userId,
+          relationship: 'FRIEND',
+        },
+      ],
     });
+
+    if (!relation)
+      throw new ApiError('You cannot unfriend without being friend.', 400);
 
     const unfriend = await User.findByIdAndUpdate(
       userId,
       {
-        $addToSet: { friends: wantToUnfriId },
+        $pull: { friends: wantToUnfriId },
       },
       { new: true, runValidators: true }
     );
@@ -106,6 +125,14 @@ const friendService = {
         runValidators: true,
       }
     );
+
+    if (!relationBetween) {
+      await Friend.create({
+        receiverId: wantToBlockId,
+        requesterId: userId,
+        relationship: 'BLOCK',
+      });
+    }
 
     await User.findByIdAndUpdate(
       userId,

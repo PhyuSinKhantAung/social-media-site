@@ -14,7 +14,10 @@ exports.createComment = catchAsync(async (req, res, next) => {
 });
 
 exports.getComments = catchAsync(async (req, res, next) => {
-  const comments = await commentService.getAllComments(req.params.id);
+  const comments = await commentService.getAllComments(
+    req.params.id,
+    req.query
+  );
   res.status(200).json({
     code: 200,
     data: comments,
@@ -35,9 +38,12 @@ exports.updateComment = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteComment = catchAsync(async (req, res, next) => {
-  await commentService.deleteComment(req.params.id, req.params.commentId);
+  const deletedCommentPost = await commentService.deleteComment(
+    req.params.id,
+    req.params.commentId
+  );
   res.status(200).json({
     code: 200,
-    data: null,
+    data: deletedCommentPost,
   });
 });

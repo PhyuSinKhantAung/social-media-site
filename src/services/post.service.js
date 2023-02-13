@@ -1,26 +1,36 @@
 const Post = require('../models/post.model');
 const User = require('../models/user.model');
+const Share = require('../models/share.model');
 const { ApiError, BadRequestError } = require('../errors');
 const Friend = require('../models/friend.model');
 const APIFeatures = require('../utilities/apiFeatures');
 
 const postService = {
   getAllposts: async (reqQuery) => {
+    const allShares = await Share.find();
+
     const features = new APIFeatures(Post.find(), reqQuery).filter().sort();
-    const posts = await features.query;
-    return posts;
+    const allPosts = await features.query;
+
+    const allPostsAndShares = [...allShares, ...allPosts];
+
+    return allPostsAndShares;
   },
   getAllMyPosts: async (reqUser, reqQuery) => {
+    const allShares = await Share.find({ sharedBy: reqUser.id });
     const features = new APIFeatures(Post.find({ user: reqUser.id }), reqQuery)
       .filter()
       .sort();
-    const posts = await features.query;
-    if (!posts)
+    const allPosts = await features.query;
+
+    const allPostsAndShares = [...allShares, ...allPosts];
+
+    if (!allPostsAndShares)
       throw new BadRequestError(
         `You cannot get your posts with invalid user id`,
         400
       );
-    return posts;
+    return allPostsAndShares;
   },
   createPost: async (reqBody, reqUser, images = []) => {
     const imageUrlsArr = images.map((img) => ({

@@ -29,7 +29,13 @@ route.patch(
   postController.updatePost
 );
 
-route.put('/:id', authenticate, uploadImages, postController.deleteImages);
+route.put(
+  '/:id',
+  authenticate,
+  validation(postSchema.deletedImageSchema),
+  uploadImages,
+  postController.deleteImages
+);
 
 // comments
 route.use('/:id/comments', commentRoute);
