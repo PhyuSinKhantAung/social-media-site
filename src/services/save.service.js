@@ -15,6 +15,7 @@ const saveService = {
       },
       { runValidators: true, new: true }
     ).populate('saves');
+
     if (!user) throw new ApiError('There is no user with that id', 400);
     return savedPost;
   },

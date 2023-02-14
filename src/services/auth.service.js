@@ -78,7 +78,6 @@ const authService = {
     const otpToken = createOtpToken(otp);
     reqSession.otp = otpToken;
     reqSession.user = reqBody;
-    console.log(otp);
     try {
       await client.messages.create({
         body: `Your Otp is ${otp}. Please keep it well, don't share it to anybody.`,

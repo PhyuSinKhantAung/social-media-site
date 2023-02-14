@@ -10,11 +10,14 @@ route.get(
 );
 
 route.post('/confirmFriend/:id', authenticate, friendController.confirmFriend);
+route.post('/cancelRequest/:id', authenticate, friendController.cancelRequest);
+
 route.post('/unfriend/:id', authenticate, friendController.unfriend);
 route.post('/block/:id', authenticate, friendController.blockFriend);
 route.post('/unblock/:id', authenticate, friendController.unblockFriend);
 
 route.get('/friendsList', authenticate, friendController.getAllFriends);
 route.get('/blocksList', authenticate, friendController.getAllBlocks);
+route.get('/', authenticate, friendController.getMutualFriends);
 
 module.exports = route;

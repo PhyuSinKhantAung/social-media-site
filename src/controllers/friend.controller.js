@@ -31,6 +31,15 @@ exports.confirmFriend = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.cancelRequest = catchAsync(async (req, res, next) => {
+  await friendService.cancelRequest(req.params.id, req.user.id);
+  res.status(200).json({
+    code: 200,
+    data: null,
+    message: 'You cancelled this request.',
+  });
+});
+
 exports.unfriend = catchAsync(async (req, res, next) => {
   const unfriend = await friendService.unfriend(req.params.id, req.user.id);
   res.status(200).json({
@@ -68,5 +77,16 @@ exports.getAllBlocks = catchAsync(async (req, res, next) => {
   res.status(200).json({
     code: 200,
     data: blocks,
+  });
+});
+
+exports.getMutualFriends = catchAsync(async (req, res, next) => {
+  const mutualFriends = await friendService.getMutualFriends(
+    req.user.id,
+    req.params.id
+  );
+  res.status(200).json({
+    code: 200,
+    data: mutualFriends,
   });
 });

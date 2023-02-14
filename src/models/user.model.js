@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 
 const userSchema = new Schema(
   {
-    name: String,
+    username: String,
     email: {
       type: String,
       unique: true,
@@ -21,12 +21,19 @@ const userSchema = new Schema(
     },
     gender: {
       type: String,
+      enum: ['male', 'female', 'others'],
     },
     profile_pic: {
-      filename: String,
       url: String,
     },
     friends: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+        default: [],
+      },
+    ],
+    mutual_friends: [
       {
         type: mongoose.Schema.ObjectId,
         ref: 'User',

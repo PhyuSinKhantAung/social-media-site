@@ -68,7 +68,32 @@ const friendService = {
       },
       { new: true, runValidators: true }
     );
+    // also push userId into wantToConfirm user doc's friends field
+    await User.findByIdAndUpdate(
+      wantToConfirmId,
+      {
+        $addToSet: { friends: userId },
+      },
+      { new: true, runValidators: true }
+    );
+
     return confirmFriend;
+  },
+  cancelRequest: async (wantToDeclinedId, userId) => {
+    await Friend.findOneAndDelete({
+      $or: [
+        {
+          receiverId: wantToDeclinedId, // ps
+          requesterId: userId, // rolly
+          relationship: 'REQUEST',
+        },
+        {
+          receiverId: userId,
+          requesterId: wantToDeclinedId,
+          relationship: 'REQUEST',
+        },
+      ],
+    });
   },
 
   unfriend: async (wantToUnfriId, userId) => {
@@ -94,6 +119,14 @@ const friendService = {
       userId,
       {
         $pull: { friends: wantToUnfriId },
+      },
+      { new: true, runValidators: true }
+    );
+
+    await User.findByIdAndUpdate(
+      wantToUnfriId,
+      {
+        $pull: { friends: userId },
       },
       { new: true, runValidators: true }
     );
@@ -206,6 +239,23 @@ const friendService = {
       select: 'name profile_pic',
     });
     return user.blocks;
+  },
+  getMutualFriends: async (ownId, userId) => {
+    const user = await User.findById(userId);
+    if (!user) throw new BadRequestError('There is no user with that id', 400);
+
+    const me = await User.findById(ownId);
+    if (!me) throw new BadRequestError('There is no user with that id', 400);
+
+    const mutualFriends = user.friends.filter((userFriId) =>
+      me.friends.some((myFriId) => myFriId.toString() === userFriId.toString())
+    );
+
+    const updatedUser = await User.findByIdAndUpdate(userId, {
+      $set: { mutual_friends: mutualFriends },
+    }).populate({ path: 'mutual_friends', select: 'name profile_pic' });
+
+    return updatedUser.mutual_friends;
   },
 };
 

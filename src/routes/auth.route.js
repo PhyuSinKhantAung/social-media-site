@@ -30,4 +30,6 @@ route.post(
 );
 route.post('/verify/login', authController.otpVerificationLogin);
 
+route.get('/logout', authController.logout);
+
 module.exports = route;

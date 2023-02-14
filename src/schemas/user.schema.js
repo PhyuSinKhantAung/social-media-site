@@ -2,9 +2,10 @@ const Joi = require('joi');
 
 const userSchemas = {
   signupUserSchema: Joi.object({
-    name: Joi.string().trim().min(3).max(30).required().messages({
+    username: Joi.string().trim().min(3).max(30).required().messages({
       'any.required': 'Your name must be string with min length of 3',
     }),
+
     phone: Joi.alternatives()
       .try(Joi.number().min(10), Joi.string().min(10))
       .messages({
@@ -18,7 +19,7 @@ const userSchemas = {
       'any.required': 'Your password must be provided',
     }),
     dob: Joi.date()
-      .max('01-01-2004')
+      .max('01-01-2005')
       .iso()
       .messages({
         'date.format': `Date format is YYYY-MM-DD`,
@@ -26,7 +27,7 @@ const userSchemas = {
       })
       .options({ convert: true })
       .required(),
-    gender: Joi.string().valid('male', 'female'),
+    gender: Joi.string().valid('male', 'female', 'others'),
   })
     .xor('phone', 'email')
     .messages({
