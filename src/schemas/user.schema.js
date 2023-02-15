@@ -32,6 +32,8 @@ const userSchemas = {
     .xor('phone', 'email')
     .messages({
       'object.missing': 'Email or phone number must be provided.',
+      'object.xor':
+        'Choose login with email or login with phone, you cannot do with both.',
     }),
 
   loginUserSchema: Joi.object({

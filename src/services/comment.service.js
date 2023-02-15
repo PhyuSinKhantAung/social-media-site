@@ -17,7 +17,10 @@ const commentService = {
         runValidators: true,
       }
     )
-      .populate({ path: 'comments.commented_by', select: 'name profile_pic' })
+      .populate({
+        path: 'comments.commented_by',
+        select: 'username profile_pic',
+      })
       .populate({ path: 'user', select: 'name profile_pic' });
     if (!commentedPost)
       throw new BadRequestError('The post with that id does not exist.', 400);

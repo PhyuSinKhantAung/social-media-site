@@ -58,21 +58,25 @@ const userSchema = new Schema(
       type: String,
       select: false,
     },
+    last_access: {
+      type: Date,
+      default: '1970-01-01 00:00:00',
+      select: false,
+    },
+    active: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-// userSchema.pre(/^findById/, function (next) {
-//   this.populate('saves');
-//   next();
-// });
-
-// userSchema.pre(/^find/, function (next) {
-//   this.populate({ path: 'saves', select: 'content images' });
-//   next();
-// });
+userSchema.pre(/^find/, function (next) {
+  this.populate({ path: 'saves', select: 'content images' });
+  next();
+});
 
 userSchema.pre('save', async function (next) {
   // if password is modified, gonna hash / if not, will go another middleware
@@ -82,9 +86,12 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-userSchema.methods.comparePassword = async function (userInputPw, realPw) {
-  const isMatchPw = await bcrypt.compare(userInputPw, realPw);
-  return isMatchPw;
+userSchema.methods.comparePassword = async function (
+  userInputPassword,
+  realPassword
+) {
+  const isMatchPassword = await bcrypt.compare(userInputPassword, realPassword);
+  return isMatchPassword;
 };
 
 const User = model('User', userSchema);

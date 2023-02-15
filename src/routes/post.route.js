@@ -9,7 +9,7 @@ const likeRoute = require('./like.route');
 const shareRoute = require('./share.route');
 const saveRoute = require('./save.route');
 
-route.get('/', authenticate, postController.getAllposts);
+route.get('/newsfeed', authenticate, postController.getAllposts);
 route.get('/me', authenticate, postController.getAllMyPosts);
 
 route.get('/:id', authenticate, postController.getPost);

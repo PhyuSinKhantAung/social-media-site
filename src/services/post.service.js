@@ -2,19 +2,31 @@ const Post = require('../models/post.model');
 const User = require('../models/user.model');
 const Share = require('../models/share.model');
 const { ApiError, BadRequestError } = require('../errors');
-const Friend = require('../models/friend.model');
 const APIFeatures = require('../utilities/apiFeatures');
 
 const postService = {
-  getAllposts: async (reqQuery) => {
-    const allShares = await Share.find();
+  getAllposts: async (userId, reqQuery) => {
+    // const features = new APIFeatures(Post.find(), reqQuery)
+    //   .filter()
+    //   .paginate()
+    //   .sort();
 
-    const features = new APIFeatures(Post.find(), reqQuery).filter().sort();
-    const allPosts = await features.query;
+    // const allPosts = await features.query;
 
-    const allPostsAndShares = [...allShares, ...allPosts];
+    const user = await User.findById(userId).select('+last_access');
+    if (!user) throw new BadRequestError('There is no user with that id', 400);
 
-    return allPostsAndShares;
+    const allPosts = await Post.find({ createdAt: { $gt: user.last_access } });
+    const allShares = await Share.find({
+      createdAt: { $gt: user.last_access },
+    });
+
+    user.last_access = new Date();
+    await user.save();
+
+    const unseenAllPostsAndShares = [...allShares, ...allPosts];
+
+    return unseenAllPostsAndShares;
   },
   getAllMyPosts: async (reqUser, reqQuery) => {
     const allShares = await Share.find({ sharedBy: reqUser.id });

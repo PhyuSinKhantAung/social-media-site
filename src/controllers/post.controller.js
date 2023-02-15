@@ -2,7 +2,7 @@ const postService = require('../services/post.service');
 const catchAsync = require('../utilities/catchAsync');
 
 exports.getAllposts = catchAsync(async (req, res, next) => {
-  const posts = await postService.getAllposts(req.query);
+  const posts = await postService.getAllposts(req.user.id, req.query);
   res.status(200).json({
     code: 200,
     data: posts,

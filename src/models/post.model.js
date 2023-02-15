@@ -26,6 +26,7 @@ const postSchema = new Schema(
         text: String,
       },
     ],
+
     taggedUserIds: [
       {
         type: mongoose.Schema.ObjectId,
@@ -67,10 +68,15 @@ postSchema.pre('save', function (next) {
 });
 
 postSchema.pre(/^find/, function (next) {
-  this.populate({ path: 'user', select: 'name profile_pic' }).populate({
-    path: 'taggedUserIds',
-    select: 'name profile_pic',
-  });
+  this.populate({ path: 'user', select: 'username profile_pic' })
+    .populate({
+      path: 'taggedUserIds',
+      select: 'username profile_pic',
+    })
+    .populate({
+      path: 'comments.commented_by',
+      select: 'username profile_pic',
+    });
   next();
 });
 

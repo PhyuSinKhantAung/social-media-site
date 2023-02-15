@@ -1,26 +1,31 @@
 const { Schema, model, default: mongoose } = require('mongoose');
 
-const shareSchema = new Schema({
-  caption: String,
-  post: {
-    type: mongoose.Schema.ObjectId,
-    ref: 'Post',
+const shareSchema = new Schema(
+  {
+    caption: String,
+    post: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Post',
+    },
+    sharedBy: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User',
+    },
+    audience: {
+      type: String,
+      enum: ['PUBLIC', 'FRIEND'],
+      default: 'PUBLIC',
+    },
   },
-  sharedBy: {
-    type: mongoose.Schema.ObjectId,
-    ref: 'User',
-  },
-  audience: {
-    type: String,
-    enum: ['PUBLIC', 'FRIEND'],
-    default: 'PUBLIC',
-  },
-});
+  {
+    timestamps: true,
+  }
+);
 
 shareSchema.pre(/^find/, function (next) {
   this.populate('post').populate({
     path: 'sharedBy',
-    select: 'name profile_pic',
+    select: 'username profile_pic',
   });
   next();
 });
