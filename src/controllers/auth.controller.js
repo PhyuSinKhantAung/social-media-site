@@ -1,5 +1,6 @@
 const authService = require('../services/auth.service');
 const catchAsync = require('../utilities/catchAsync');
+const { sendOtp } = require('../utilities/token');
 
 exports.signUpWithEmail = catchAsync(async (req, res, next) => {
   const { user, jwtToken } = await authService.signUpWithEmail(req.body, res);
@@ -33,10 +34,10 @@ exports.otpVerification = catchAsync(async (req, res, next) => {
 });
 
 exports.resendOtp = catchAsync(async (req, res, next) => {
-  await authService.resendOtp(req.session);
+  await sendOtp(req.session);
   res.status(200).json({
     code: 200,
-    message: 'OTP was resent successfully.',
+    message: 'OTP has been resent successfully.',
   });
 });
 
@@ -70,3 +71,11 @@ exports.otpVerificationLogin = catchAsync(async (req, res, next) => {
     token: jwtToken,
   });
 });
+
+exports.logout = (req, res) => {
+  res.cookie('jwt', 'loggedout', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+  res.status(200).json({ status: 'success' });
+};
