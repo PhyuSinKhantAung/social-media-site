@@ -1,8 +1,9 @@
 const crypto = require('crypto');
 
 const { NotFoundError, BadRequestError, ApiError } = require('../errors');
-const { sendJWTToken, sendOtp } = require('../utilities/token');
+const { sendJWTToken, sendOtp, createOtpToken } = require('../utilities/token');
 const User = require('../models/user.model');
+const sendMail = require('../utilities/email');
 
 const authService = {
   signUpWithEmail: async (reqBody, res) => {
@@ -34,7 +35,7 @@ const authService = {
 
     reqSession.user = reqBody;
 
-    sendOtp(reqSession);
+    await sendOtp(reqSession);
   },
 
   otpVerification: async (userOtp, reqSession, res) => {
@@ -111,6 +112,51 @@ const authService = {
       user.active = true;
       await user.save();
     }
+    const jwtToken = sendJWTToken(user, res);
+    return { user, jwtToken };
+  },
+
+  forgotPassword: async (reqBody, reqSession) => {
+    const { email } = reqBody;
+    const user = await User.findOne({ email });
+    if (!user)
+      throw new NotFoundError('There is no user with that email.', 404);
+
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    const otpToken = createOtpToken(otp);
+    reqSession.otp = otpToken;
+    reqSession.email = email;
+
+    await sendMail.sendRecoveryOtp(email, otp);
+  },
+
+  recoveryOtpVerification: async (userOtp, realOtp) => {
+    if (!userOtp)
+      throw new BadRequestError(
+        'This route is only for verifying recovery otp.',
+        400
+      );
+
+    const [otp, expiredTime] = realOtp.split('.');
+    const hashedUserOtp = crypto
+      .createHash('sha256')
+      .update(userOtp)
+      .digest('hex');
+
+    if (otp !== hashedUserOtp) throw new ApiError('Incorrect otp.', 401);
+
+    if (Date.now() > expiredTime)
+      throw new BadRequestError('Your otp was expired.', 400);
+  },
+
+  resetPassword: async (reqBody, reqSession, res) => {
+    if (!reqBody.password)
+      throw new BadRequestError('You must provide your new password.', 400);
+    const user = await User.findOne({ email: reqSession.email });
+
+    user.password = reqBody.password;
+    await user.save();
+
     const jwtToken = sendJWTToken(user, res);
     return { user, jwtToken };
   },

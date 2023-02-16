@@ -79,3 +79,24 @@ exports.logout = (req, res) => {
   });
   res.status(200).json({ status: 'success' });
 };
+
+exports.forgotPassword = catchAsync(async (req, res, next) => {
+  await authService.forgotPassword(req.body, req.session);
+  res.status(200).json({
+    code: 200,
+    message: `Recovery OTP was sent to email.`,
+  });
+});
+
+exports.recoveryOtpVerification = catchAsync(async (req, res, next) => {
+  await authService.recoveryOtpVerification(req.body.otp, req.session.otp);
+  next();
+});
+
+exports.resetPassword = catchAsync(async (req, res, next) => {
+  const user = await authService.resetPassword(req.body, req.session, res);
+  res.status(200).json({
+    code: 200,
+    data: user,
+  });
+});

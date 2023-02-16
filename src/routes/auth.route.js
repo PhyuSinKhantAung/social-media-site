@@ -35,4 +35,11 @@ route.get('/resend', authController.resendOtp);
 
 route.get('/logout', authController.logout);
 
+route.post('/forgotpassword', authController.forgotPassword);
+route.post(
+  '/resetpassword',
+  authController.recoveryOtpVerification,
+  authController.resetPassword
+);
+
 module.exports = route;
