@@ -91,7 +91,7 @@ const authService = {
       );
 
     reqSession.user = reqBody;
-    sendOtp(reqSession);
+    await sendOtp(reqSession);
   },
 
   otpVerificationLogin: async (userOtp, reqSession, res) => {
@@ -130,26 +130,24 @@ const authService = {
     await sendMail.sendRecoveryOtp(email, otp);
   },
 
-  recoveryOtpVerification: async (userOtp, realOtp) => {
-    if (!userOtp)
+  resetPassword: async (reqBody, reqSession, res) => {
+    if (!reqBody.otp)
       throw new BadRequestError(
         'This route is only for verifying recovery otp.',
         400
       );
 
-    const [otp, expiredTime] = realOtp.split('.');
+    const [otp, expiredTime] = reqSession.otp.split('.');
     const hashedUserOtp = crypto
       .createHash('sha256')
-      .update(userOtp)
+      .update(reqBody.otp)
       .digest('hex');
 
     if (otp !== hashedUserOtp) throw new ApiError('Incorrect otp.', 401);
 
     if (Date.now() > expiredTime)
       throw new BadRequestError('Your otp was expired.', 400);
-  },
 
-  resetPassword: async (reqBody, reqSession, res) => {
     if (!reqBody.password)
       throw new BadRequestError('You must provide your new password.', 400);
     const user = await User.findOne({ email: reqSession.email });

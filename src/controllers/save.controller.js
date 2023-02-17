@@ -22,6 +22,7 @@ exports.getAllSavedPosts = catchAsync(async (req, res, next) => {
   res.status(200).json({
     code: 200,
     data: savedPosts,
+    count: savedPosts.length,
   });
 });
 

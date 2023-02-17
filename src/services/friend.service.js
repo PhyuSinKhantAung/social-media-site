@@ -178,7 +178,7 @@ const friendService = {
       }
     );
 
-    const blockFriend = await User.findByIdAndUpdate(
+    await User.findByIdAndUpdate(
       userId,
       { $addToSet: { blocks: wantToBlockId } },
       {
@@ -186,8 +186,6 @@ const friendService = {
         new: true,
       }
     );
-
-    return blockFriend;
   },
 
   unblock: async (wantToUnblockId, userId) => {
@@ -212,7 +210,7 @@ const friendService = {
         400
       );
 
-    const unblockFriend = await User.findByIdAndUpdate(
+    await User.findByIdAndUpdate(
       userId,
       {
         $pull: { blocks: wantToUnblockId },
@@ -222,6 +220,8 @@ const friendService = {
         runValidators: true,
       }
     );
+
+    const unblockFriend = await User.findById(wantToUnblockId);
 
     return unblockFriend;
   },
@@ -236,7 +236,7 @@ const friendService = {
   getAllBlocks: async (userId) => {
     const user = await User.findById(userId).populate({
       path: 'blocks',
-      select: 'name profile_pic',
+      select: 'username profile_pic',
     });
     return user.blocks;
   },

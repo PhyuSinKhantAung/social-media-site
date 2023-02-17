@@ -88,10 +88,10 @@ const userSchema = new Schema(
   }
 );
 
-userSchema.pre(/^find/, function (next) {
-  this.populate({ path: 'saves', select: 'content images' });
-  next();
-});
+// userSchema.pre(/^find/, function (next) {
+//   this.populate('saves');
+//   next();
+// });
 
 userSchema.pre('save', async function (next) {
   // if password is modified, gonna hash / if not, will go another middleware
@@ -115,19 +115,6 @@ userSchema.methods.comparePassword = async function (
   const isMatchPassword = await bcrypt.compare(userInputPassword, realPassword);
   return isMatchPassword;
 };
-
-// userSchema.methods.compareOtp = async function (userOtp, realOtpToken) {
-//   const [realOtp, expiredTime] = realOtpToken.split('.');
-//   const hashedUserOtp = crypto
-//     .createHash('sha256')
-//     .update(userOtp)
-//     .digest('hex');
-
-//   if (Date.now() > expiredTime)
-//     throw new BadRequestError('Your otp was expired.', 400);
-
-//   if (realOtp !== hashedUserOtp) throw new ApiError('Incorrect otp.', 401);
-// };
 
 const User = model('User', userSchema);
 

@@ -17,6 +17,8 @@ const storage = new CloudinaryStorage({
 });
 
 const fileFilter = (req, file, cb) => {
+  console.log('mime type', file.mimetype);
+
   if (file.mimetype.startsWith('image')) cb(null, true);
   else cb(new ApiError('You cannot add this kind of file type.', 400), false);
 };

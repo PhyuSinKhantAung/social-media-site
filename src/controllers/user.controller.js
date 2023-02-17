@@ -2,7 +2,7 @@ const userService = require('../services/user.service');
 const catchAsync = require('../utilities/catchAsync');
 
 exports.getAllUsers = catchAsync(async (req, res, next) => {
-  const users = await userService.getAllUsers();
+  const users = await userService.getAllUsers(req.query, req.user.id);
   res.status(200).json({
     code: 200,
     data: users,

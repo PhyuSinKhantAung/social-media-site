@@ -88,15 +88,20 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.recoveryOtpVerification = catchAsync(async (req, res, next) => {
-  await authService.recoveryOtpVerification(req.body.otp, req.session.otp);
-  next();
-});
+// exports.recoveryOtpVerification = catchAsync(async (req, res, next) => {
+//   await authService.recoveryOtpVerification(req.body.otp, req.session.otp);
+//   next();
+// });
 
 exports.resetPassword = catchAsync(async (req, res, next) => {
-  const user = await authService.resetPassword(req.body, req.session, res);
+  const { user, jwtToken } = await authService.resetPassword(
+    req.body,
+    req.session,
+    res
+  );
   res.status(200).json({
     code: 200,
     data: user,
+    token: jwtToken,
   });
 });

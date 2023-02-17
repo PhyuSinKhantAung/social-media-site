@@ -1,13 +1,20 @@
-const {
-  ApiError,
-  BadRequestError,
-  UnauthenticatedError,
-} = require('../errors');
+const { ApiError, BadRequestError } = require('../errors');
 const User = require('../models/user.model');
 
 const userService = {
-  getAllUsers: async () => {
-    const users = await User.find();
+  getAllUsers: async (reqQuery, ownId) => {
+    const queryObj = { ...reqQuery };
+    if (queryObj.username) {
+      queryObj.username = { $regex: queryObj.username, $options: 'i' };
+    }
+    const users = await User.find(queryObj);
+
+    const isBlocked = users.filter((user) =>
+      user.blocks.some((blockedId) => blockedId.toString() === ownId)
+    );
+    if (isBlocked.length !== 0)
+      throw new ApiError('You have been blocked by this user.', 404);
+
     return users;
   },
 
@@ -20,7 +27,7 @@ const userService = {
       throw new BadRequestError('This user is not available right now.', 400);
 
     if (user.blocks.find((blockedId) => blockedId.toString() === ownId))
-      throw new ApiError('You have been blocked by this user.', 401);
+      throw new ApiError('You have been blocked by this user.', 404);
 
     return user;
   },

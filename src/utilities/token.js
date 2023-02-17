@@ -42,11 +42,9 @@ const createOtpToken = (otp) => {
 
 const sendOtp = async (reqSession) => {
   const client = twilio(ACCOUNT_SID, AUTH_TOKEN);
-  console.log(ACCOUNT_SID);
   const otp = Math.floor(100000 + Math.random() * 900000);
   const otpToken = createOtpToken(otp);
   reqSession.otp = otpToken;
-  console.log(reqSession.user.phone);
   try {
     await client.messages.create({
       body: `Your Otp is ${otp}. Please keep it well, don't share it to anybody.`,

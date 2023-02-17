@@ -30,10 +30,7 @@ const postService = {
   },
   getAllMyPosts: async (reqUser, reqQuery) => {
     const allShares = await Share.find({ sharedBy: reqUser.id });
-    const features = new APIFeatures(Post.find({ user: reqUser.id }), reqQuery)
-      .filter()
-      .sort();
-    const allPosts = await features.query;
+    const allPosts = await Post.find({ user: reqUser.id }).sort('-createdAt');
 
     const allPostsAndShares = [...allShares, ...allPosts];
 
@@ -50,6 +47,12 @@ const postService = {
     }));
 
     // check tag user-id include or not in friend-list
+
+    if (typeof reqBody.taggedUserIds === 'string') {
+      const taggedUserIdsArray = reqBody.taggedUserIds.split(',');
+      reqBody.taggedUserIds = taggedUserIdsArray;
+    }
+
     if (reqBody.taggedUserIds) {
       const tags = reqBody.taggedUserIds;
       const user = await User.findById(reqUser);
