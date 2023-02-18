@@ -39,6 +39,7 @@ const userService = {
   },
 
   updateMe: async (userId, reqBody, profilePic) => {
+    console.log(profilePic);
     if (!(await User.findById(userId)))
       throw new BadRequestError('There is no user with that id', 400);
 

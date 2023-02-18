@@ -3,6 +3,7 @@ const User = require('../models/user.model');
 const Share = require('../models/share.model');
 const { ApiError, BadRequestError } = require('../errors');
 const APIFeatures = require('../utilities/apiFeatures');
+const cloudinary = require('../library/cloudinaryConfig');
 
 const postService = {
   getAllposts: async (userId, reqQuery) => {
@@ -87,6 +88,7 @@ const postService = {
     const imageUrlsArr = images.map((img) => ({
       url: img.path,
     }));
+    console.log(images);
 
     // check tag user-id include or not in friend-list
     if (reqBody.taggedUserIds) {
@@ -140,6 +142,15 @@ const postService = {
       },
       { new: true, runValidators: true }
     );
+    // Delete from cloudinary
+    cloudinary.uploader.destroy(reqBody.public_id, (error, result) => {
+      if (error) {
+        throw new ApiError('Image deleting fails');
+      } else {
+        console.log('OK');
+      }
+    });
+
     return deletedImgPost;
   },
 
