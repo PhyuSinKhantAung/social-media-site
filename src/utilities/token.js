@@ -12,8 +12,6 @@ const {
 } = require('../constant');
 const { ApiError } = require('../errors');
 
-const client = twilio(ACCOUNT_SID, AUTH_TOKEN);
-
 const sendJWTToken = (user, res) => {
   // creating jwt token
   const token = jwt.sign({ id: user._id }, JWT_SECRET, {
@@ -43,6 +41,7 @@ const createOtpToken = (otp) => {
 };
 
 const sendOtp = async (reqSession) => {
+  const client = twilio(ACCOUNT_SID, AUTH_TOKEN);
   const otp = Math.floor(100000 + Math.random() * 900000);
   const otpToken = createOtpToken(otp);
   reqSession.otp = otpToken;
@@ -53,6 +52,7 @@ const sendOtp = async (reqSession) => {
       to: reqSession.user.phone,
     });
   } catch (err) {
+    console.log(err);
     throw new ApiError('There is something went wrong while registering', 400);
   }
 };

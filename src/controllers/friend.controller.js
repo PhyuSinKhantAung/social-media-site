@@ -49,10 +49,11 @@ exports.unfriend = catchAsync(async (req, res, next) => {
 });
 
 exports.blockFriend = catchAsync(async (req, res, next) => {
-  const friend = await friendService.blockFriend(req.params.id, req.user.id);
+  await friendService.blockFriend(req.params.id, req.user.id);
   res.status(200).json({
     code: 200,
-    data: friend,
+    data: null,
+    message: 'You blocked successfully.',
   });
 });
 

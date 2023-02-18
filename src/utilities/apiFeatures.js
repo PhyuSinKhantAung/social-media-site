@@ -6,11 +6,13 @@ class APIFeatures {
 
   filter(customFilter = {}) {
     const queryObj = { ...this.queryString };
+    queryObj.username = { $regex: queryObj.username, $options: 'i' };
 
     const excludedFields = ['page', 'sort', 'limit', 'fields'];
     excludedFields.forEach((el) => delete queryObj[el]);
 
     let queryStr = JSON.stringify(queryObj);
+
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
     this.query = this.query.find({ ...JSON.parse(queryStr), ...customFilter });
 

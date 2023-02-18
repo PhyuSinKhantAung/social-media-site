@@ -4,7 +4,7 @@ const friendRouter = require('./friend.route');
 const authenticate = require('../middlewares/authenticate');
 const { uploadProfilePic } = require('../library/multer');
 
-route.get('/', userController.getAllUsers);
+route.get('/', authenticate, userController.getAllUsers);
 route.get('/me', authenticate, userController.getMe);
 route.patch('/me', authenticate, uploadProfilePic, userController.updateMe);
 route.delete('/me/deactivate', authenticate, userController.deactivateMe);

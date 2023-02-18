@@ -11,7 +11,7 @@ route.post(
 
 route.post(
   '/email/login',
-  validation(userSchemas.loginUserSchema),
+  // validation(userSchemas.loginUserSchema),
   authController.logInWithEmail
 );
 
@@ -34,5 +34,8 @@ route.post('/verify/login', authController.otpVerificationLogin);
 route.get('/resend', authController.resendOtp);
 
 route.get('/logout', authController.logout);
+
+route.post('/forgotpassword', authController.forgotPassword);
+route.post('/resetpassword', authController.resetPassword);
 
 module.exports = route;
