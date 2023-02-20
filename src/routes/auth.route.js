@@ -11,7 +11,7 @@ route.post(
 
 route.post(
   '/email/login',
-  // validation(userSchemas.loginUserSchema),
+  validation(userSchemas.loginUserSchema),
   authController.logInWithEmail
 );
 

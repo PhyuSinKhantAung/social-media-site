@@ -2,18 +2,10 @@ const Post = require('../models/post.model');
 const User = require('../models/user.model');
 const Share = require('../models/share.model');
 const { ApiError, BadRequestError } = require('../errors');
-const APIFeatures = require('../utilities/apiFeatures');
 const cloudinary = require('../library/cloudinaryConfig');
 
 const postService = {
   getAllposts: async (userId, reqQuery) => {
-    // const features = new APIFeatures(Post.find(), reqQuery)
-    //   .filter()
-    //   .paginate()
-    //   .sort();
-
-    // const allPosts = await features.query;
-
     const user = await User.findById(userId).select('+last_access');
     if (!user) throw new BadRequestError('There is no user with that id', 400);
 
@@ -45,15 +37,16 @@ const postService = {
   createPost: async (reqBody, reqUser, images = []) => {
     const imageUrlsArr = images.map((img) => ({
       url: img.path,
+      public_id: img.filename,
     }));
 
-    // check tag user-id include or not in friend-list
-
+    // if user request was a string
     if (typeof reqBody.taggedUserIds === 'string') {
       const taggedUserIdsArray = reqBody.taggedUserIds.split(',');
       reqBody.taggedUserIds = taggedUserIdsArray;
     }
 
+    // check tag user-id include or not in friend-list
     if (reqBody.taggedUserIds) {
       const tags = reqBody.taggedUserIds;
       const user = await User.findById(reqUser);
@@ -87,8 +80,14 @@ const postService = {
   updatePost: async (reqBody, reqUser, postId, images = []) => {
     const imageUrlsArr = images.map((img) => ({
       url: img.path,
+      public_id: img.filename,
     }));
-    console.log(images);
+
+    // if user request was a string
+    if (typeof reqBody.taggedUserIds === 'string') {
+      const taggedUserIdsArray = reqBody.taggedUserIds.split(',');
+      reqBody.taggedUserIds = taggedUserIdsArray;
+    }
 
     // check tag user-id include or not in friend-list
     if (reqBody.taggedUserIds) {
@@ -99,7 +98,6 @@ const postService = {
       const canTag = tags.filter((tagId) =>
         friends.some((friId) => friId.toString() === tagId)
       );
-
       if (canTag.length !== tags.length)
         throw new ApiError(
           'Tag user id does not exist in your friend list',
@@ -114,6 +112,7 @@ const postService = {
     );
     if (!post)
       throw new BadRequestError('The post with that id does not exist.', 400);
+
     return post;
   },
 
@@ -125,11 +124,12 @@ const postService = {
     const { deletedImages } = reqBody;
     if (!deletedImages)
       throw new ApiError(`This route is only for deleting post's images`, 400);
-    const hadToDelId = post.images.filter((imgUrlObj) =>
+
+    const hadToDeleteImageIdArr = post.images.filter((imgUrlObj) =>
       deletedImages.some((id) => id === imgUrlObj._id.toString())
     );
 
-    if (hadToDelId.length !== deletedImages.length)
+    if (hadToDeleteImageIdArr.length !== deletedImages.length)
       throw new BadRequestError(
         `The Id you want to delete does not match with chosen image's id`,
         400
@@ -138,17 +138,18 @@ const postService = {
     const deletedImgPost = await Post.findByIdAndUpdate(
       postId,
       {
-        $pullAll: { images: hadToDelId },
+        $pullAll: { images: hadToDeleteImageIdArr },
       },
       { new: true, runValidators: true }
     );
+
     // Delete from cloudinary
-    cloudinary.uploader.destroy(reqBody.public_id, (error, result) => {
-      if (error) {
-        throw new ApiError('Image deleting fails');
-      } else {
-        console.log('OK');
-      }
+    hadToDeleteImageIdArr.forEach((urlObj) => {
+      cloudinary.uploader.destroy(urlObj.public_id, (error, result) => {
+        if (error) {
+          throw new ApiError('Image deleting fails');
+        }
+      });
     });
 
     return deletedImgPost;

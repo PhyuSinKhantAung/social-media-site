@@ -8,6 +8,7 @@ const postSchema = new Schema(
     images: [
       {
         url: String,
+        public_id: String,
       },
     ],
     likes: [
@@ -61,9 +62,9 @@ postSchema.virtual('like_count').get(function () {
 
 postSchema.pre('save', function (next) {
   if (this.isNew) next();
+
   this.comment_count = this.comments.length;
   this.like_count = this.likes.length;
-
   return next;
 });
 
