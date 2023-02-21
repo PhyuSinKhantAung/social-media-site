@@ -5,6 +5,7 @@ const friendSchema = new Schema({
     type: mongoose.Schema.ObjectId,
     ref: 'User',
   },
+
   requesterId: {
     type: mongoose.Schema.ObjectId,
     ref: 'User',
@@ -16,9 +17,9 @@ const friendSchema = new Schema({
 });
 
 friendSchema.pre(/^find/, function (next) {
-  this.populate({ path: 'receiverId', select: 'name profile_pic' }).populate({
+  this.populate({
     path: 'requesterId',
-    select: 'name profile_pic',
+    select: 'username profile_pic',
   });
   next();
 });

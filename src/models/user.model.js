@@ -19,7 +19,7 @@ const userSchema = new Schema(
       select: false,
     },
     dob: {
-      type: String,
+      type: Date,
     },
     gender: {
       type: String,
@@ -70,18 +70,6 @@ const userSchema = new Schema(
       type: String,
       select: false,
     },
-    // otp: {
-    //   type: String,
-    //   select: false,
-    // },
-    // passwordResetToken: {
-    //   type: String,
-    //   select: false,
-    // },
-    // passwordResetExpires: {
-    //   type: String,
-    //   select: false,
-    // },
   },
   {
     timestamps: true,

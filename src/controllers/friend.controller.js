@@ -2,13 +2,11 @@ const catchAsync = require('../utilities/catchAsync');
 const friendService = require('../services/friend.service');
 
 exports.addFriend = catchAsync(async (req, res, next) => {
-  const addedFriendInfo = await friendService.addFriend(
-    req.params.id,
-    req.user.id
-  );
+  await friendService.addFriend(req.params.id, req.user.id);
   res.status(200).json({
     code: 200,
-    data: addedFriendInfo,
+    data: null,
+    message: 'Your friend request was sent successfully.',
   });
 });
 
@@ -17,6 +15,7 @@ exports.getAllFriendRequests = catchAsync(async (req, res, next) => {
   res.status(200).json({
     code: 200,
     data: friendRequests,
+    count: friendRequests.length,
   });
 });
 
@@ -36,7 +35,7 @@ exports.cancelRequest = catchAsync(async (req, res, next) => {
   res.status(200).json({
     code: 200,
     data: null,
-    message: 'You cancelled this request.',
+    message: 'You cancelled the request.',
   });
 });
 
@@ -70,6 +69,7 @@ exports.getAllFriends = catchAsync(async (req, res, next) => {
   res.status(200).json({
     code: 200,
     data: friends,
+    count: friends.length,
   });
 });
 
@@ -78,6 +78,7 @@ exports.getAllBlocks = catchAsync(async (req, res, next) => {
   res.status(200).json({
     code: 200,
     data: blocks,
+    count: blocks.length,
   });
 });
 

@@ -8,6 +8,9 @@ const friendService = {
     if (!user)
       throw new BadRequestError('The user with that id does not exist.', 400);
 
+    if (wantToaddId === userId)
+      throw new BadRequestError('You cannot add by yourself.', 400);
+
     const isUserBlock = user.blocks.find(
       (blockId) => blockId.toString() === userId
     );
@@ -29,18 +32,18 @@ const friendService = {
         400
       );
 
-    const addFriendInfo = await Friend.create({
+    await Friend.create({
       receiverId: wantToaddId,
       requesterId: userId,
     });
 
-    return addFriendInfo;
+    // return addFriendInfo;
   },
   getAllFriendRequests: async (userId) => {
     const friendRequests = await Friend.find({
       receiverId: userId,
       relationship: 'REQUEST',
-    });
+    }).select('-receiverId');
     if (!friendRequests)
       throw new BadRequestError(
         'User id is invalid or There is no request with that id',
@@ -68,7 +71,7 @@ const friendService = {
       },
       { new: true, runValidators: true }
     );
-    // also push userId into wantToConfirm user doc's friends field
+    // also push userId into wantToConfirm user's friends field
     await User.findByIdAndUpdate(
       wantToConfirmId,
       {
@@ -123,6 +126,7 @@ const friendService = {
       { new: true, runValidators: true }
     );
 
+    // also pull userId into wantToUnfri user's friends field
     await User.findByIdAndUpdate(
       wantToUnfriId,
       {
@@ -229,7 +233,7 @@ const friendService = {
   getAllFriends: async (userId) => {
     const user = await User.findById(userId).populate({
       path: 'friends',
-      select: 'name profile_pic',
+      select: 'username profile_pic',
     });
     return user.friends;
   },
@@ -253,7 +257,7 @@ const friendService = {
 
     const updatedUser = await User.findByIdAndUpdate(userId, {
       $set: { mutual_friends: mutualFriends },
-    }).populate({ path: 'mutual_friends', select: 'name profile_pic' });
+    }).populate({ path: 'mutual_friends', select: 'username profile_pic' });
 
     return updatedUser.mutual_friends;
   },
