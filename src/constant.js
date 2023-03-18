@@ -23,6 +23,7 @@ exports.EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
 exports.EMAIL_HOST = process.env.EMAIL_HOST;
 exports.EMAIL_PORT = process.env.EMAIL_PORT;
 
+// Error
 exports.USER_ERRORS = {
   USER_NOT_FOUND: { code: 404, message: 'User not found' },
   USER_ALREADY_EXISTS: { code: 409, message: 'User already exists' },
@@ -45,5 +46,13 @@ exports.OTP_ERRORS = {
   EXPIRED_OTP: {
     code: 400,
     message: 'Your OTP was expired.',
+  },
+};
+
+exports.BLOCK_USER_ERRORS = {
+  USER_NOT_FOUND: {
+    code: 404,
+    message:
+      'This content is not available. You have been blocked by this user.',
   },
 };

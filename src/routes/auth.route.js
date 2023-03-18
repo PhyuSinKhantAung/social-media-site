@@ -1,29 +1,29 @@
 const route = require('express').Router();
 const authController = require('../controllers/auth.controller');
-const validation = require('../middlewares/validation');
+const { validateBody } = require('../middlewares/validation');
 const userSchemas = require('../schemas/user.schema');
 
 route.post(
   '/email/signup',
-  validation(userSchemas.signupUserSchema),
+  validateBody(userSchemas.signupUserSchema),
   authController.signUpWithEmail
 );
 
 route.post(
   '/email/login',
-  validation(userSchemas.loginUserSchema),
+  validateBody(userSchemas.loginUserSchema),
   authController.logInWithEmail
 );
 
 route.post(
   '/forgotpassword',
-  validation(userSchemas.forgotPasswordSchema),
+  validateBody(userSchemas.forgotPasswordSchema),
   authController.forgotPassword
 );
 
 route.post(
   '/resetpassword',
-  validation(userSchemas.resetPasswordSchema),
+  validateBody(userSchemas.resetPasswordSchema),
   authController.resetPassword
 );
 
