@@ -33,7 +33,7 @@ exports.USER_ERRORS = {
 
 exports.EMAIL_ERRORS = {
   EMAIL_FAILED: {
-    code: 421,
+    code: 500,
     message: 'There is something went wrong while sending email.',
   },
 };
@@ -44,7 +44,7 @@ exports.OTP_ERRORS = {
     message: 'Wrong OTP',
   },
   EXPIRED_OTP: {
-    code: 400,
+    code: 404,
     message: 'Your OTP was expired.',
   },
 };
@@ -54,5 +54,39 @@ exports.BLOCK_USER_ERRORS = {
     code: 404,
     message:
       'This content is not available. You have been blocked by this user.',
+  },
+};
+
+exports.POST_ERRORS = {
+  TAGGED_USER_NOT_FOUND: {
+    code: 404,
+    message: 'Tagged user id does not exist in your friend list.',
+  },
+  POST_NOT_FOUND: {
+    code: 404,
+    message: 'Post not found.',
+  },
+  IMAGE_NOT_FOUND: {
+    code: 400,
+    message: 'Image not found.',
+  },
+  DELETE_IMAGE_FAILS: {
+    code: 500,
+    message: 'There is something went wrong while deleting images.',
+  },
+  OWNER_ONLY_ALLOWED: {
+    code: 401,
+    message: 'You are not allowed.',
+  },
+};
+
+exports.COMMENT_ERRORS = {
+  COMMENT_NOT_FOUND: {
+    code: 404,
+    message: 'Comment not found.',
+  },
+  OWNER_ONLY_ALLOWED: {
+    code: 401,
+    message: 'You are not allowed.',
   },
 };
