@@ -7,7 +7,8 @@ const saveRouter = require('./routes/save.route');
 const userRouter = require('./routes/user.route');
 
 router.use('/auth', authRouter);
-// s// router.use('/posts', postRouter);
+router.use('/users', userRouter);
+// router.use('/posts', postRouter);
 // router.use('/friends', friendRouter);
 
 // router.use('/shares', shareRouter);

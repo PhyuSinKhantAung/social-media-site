@@ -18,6 +18,7 @@ const authController = {
     successResponse({
       res,
       code: 200,
+      data: null,
       message: 'Recovery OTP has been sent to your email successfully.',
     });
   }),
@@ -36,7 +37,7 @@ const authController = {
       expires: new Date(Date.now() + 10 * 1000),
       httpOnly: true,
     });
-    successResponse({ res, code: 200 });
+    successResponse({ res, code: 200, data: null });
   },
 };
 

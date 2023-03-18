@@ -1,87 +1,64 @@
-// const User = require('../models/user.model');
+const { ObjectId } = require('mongodb');
+const { BLOCK_USER_ERRORS, USER_ERRORS } = require('../constant');
 
-// const userService = {
-//   getAllUsers: async (reqQuery, ownId) => {
-//     const queryObj = { ...reqQuery };
-//     if (queryObj.username) {
-//       queryObj.username = { $regex: queryObj.username, $options: 'i' };
-//     }
-//     const users = await User.find(queryObj);
+const User = require('../models/user.model');
 
-//     const isBlocked = users.filter((user) =>
-//       user.blocks.some((blockedId) => blockedId.toString() === ownId)
-//     );
-//     if (isBlocked.length !== 0)
-//       throw new ApiError('You have been blocked by this user.', 404);
+const userService = {
+  getAllUsers: async (reqQuery, ownId) => {
+    const queryObj = { ...reqQuery };
 
-//     return users;
-//   },
+    if (queryObj.username) {
+      queryObj.username = { $regex: queryObj.username, $options: 'i' };
+    }
 
-//   getUser: async (userId, ownId) => {
-//     const user = await User.findById(userId);
+    const users = await User.find(queryObj);
 
-//     if (!user) throw new BadRequestError('There is no user with that id.', 400);
+    const isBlocked = users.some((user) =>
+      user.blocks.includes(ObjectId(ownId))
+    );
 
-//     if (user.active === false)
-//       throw new BadRequestError('This user is not available right now.', 400);
+    if (isBlocked) throw BLOCK_USER_ERRORS.USER_NOT_FOUND;
 
-//     if (user.blocks.find((blockedId) => blockedId.toString() === ownId))
-//       throw new ApiError('You have been blocked by this user.', 404);
+    return users;
+  },
 
-//     return user;
-//   },
+  getUserById: async (userId, ownId) => {
+    const user = await User.findById(userId);
 
-//   getMe: async (userId) => {
-//     const user = await User.findById(userId);
-//     if (!user) throw new BadRequestError('There is no user with that id', 400);
-//     return user;
-//   },
+    if (!user) throw USER_ERRORS.USER_NOT_FOUND;
 
-//   updateMe: async (userId, reqBody, profilePic) => {
-//     console.log(profilePic);
-//     if (!(await User.findById(userId)))
-//       throw new BadRequestError('There is no user with that id', 400);
+    if (user.active === false) throw USER_ERRORS.USER_NOT_FOUND;
 
-//     if (reqBody.password)
-//       throw new BadRequestError(
-//         'You cannot update password on this route',
-//         400
-//       );
+    if (user.blocks.find((blockedId) => blockedId.toString() === ownId))
+      throw BLOCK_USER_ERRORS.USER_NOT_FOUND;
 
-//     if (profilePic)
-//       reqBody.profile_pic = {
-//         url: profilePic.path,
-//       };
+    return user;
+  },
 
-//     const updatedUser = await User.findByIdAndUpdate(userId, reqBody, {
-//       new: true,
-//     });
-//     return updatedUser;
-//   },
+  updateMe: async (myId, reqBody, profilePic) => {
+    if (!(await User.findById(myId))) throw USER_ERRORS.USER_NOT_FOUND;
 
-//   deactivateMe: async (userId, res) => {
-//     if (!(await User.findById(userId)))
-//       throw new BadRequestError('There is no user with that id', 400);
+    if (profilePic)
+      reqBody.profile_pic = {
+        url: profilePic.path,
+      };
 
-//     await User.findByIdAndUpdate(userId, { active: false });
+    const updatedUser = await User.findByIdAndUpdate(myId, reqBody, {
+      new: true,
+    });
+    return updatedUser;
+  },
 
-//     res.cookie('jwt', 'loggedout', {
-//       expires: new Date(Date.now() + 10 * 1000),
-//       httpOnly: true,
-//     });
-//   },
+  deactivateMe: async (myId, res) => {
+    if (!(await User.findById(myId))) throw USER_ERRORS.USER_NOT_FOUND;
 
-//   // deleteMe: async (userId, res) => {
-//   //   if (!(await User.findById(userId)))
-//   //     throw new BadRequestError('There is no user with that id', 400);
+    await User.findByIdAndUpdate(myId, { active: false });
 
-//   //   await User.findByIdAndDelete(userId);
+    res.cookie('jwt', 'loggedout', {
+      expires: new Date(Date.now() + 10 * 1000),
+      httpOnly: true,
+    });
+  },
+};
 
-//   //   res.cookie('jwt', 'loggedout', {
-//   //     expires: new Date(Date.now() + 10 * 1000),
-//   //     httpOnly: true,
-//   //   });
-//   // },
-// };
-
-// module.exports = userService;
+module.exports = userService;
