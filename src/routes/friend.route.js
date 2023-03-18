@@ -1,23 +1,23 @@
-const route = require('express').Router({ mergeParams: true });
-const friendController = require('../controllers/friend.controller');
-const authenticate = require('../middlewares/authenticate');
+// const route = require('express').Router({ mergeParams: true });
+// const friendController = require('../controllers/friend.controller');
+// const authenticate = require('../middlewares/authenticate');
 
-route.post('/addFriend/:id', authenticate, friendController.addFriend);
-route.get(
-  '/friendRequests',
-  authenticate,
-  friendController.getAllFriendRequests
-);
+// route.post('/addFriend/:id', authenticate, friendController.addFriend);
+// route.get(
+//   '/friendRequests',
+//   authenticate,
+//   friendController.getAllFriendRequests
+// );
 
-route.post('/confirmFriend/:id', authenticate, friendController.confirmFriend);
-route.post('/cancelRequest/:id', authenticate, friendController.cancelRequest);
+// route.post('/confirmFriend/:id', authenticate, friendController.confirmFriend);
+// route.post('/cancelRequest/:id', authenticate, friendController.cancelRequest);
 
-route.post('/unfriend/:id', authenticate, friendController.unfriend);
-route.post('/block/:id', authenticate, friendController.blockFriend);
-route.post('/unblock/:id', authenticate, friendController.unblockFriend);
+// route.post('/unfriend/:id', authenticate, friendController.unfriend);
+// route.post('/block/:id', authenticate, friendController.blockFriend);
+// route.delete('/unblock/:id', authenticate, friendController.unblockFriend);
 
-route.get('/friendsList', authenticate, friendController.getAllFriends);
-route.get('/blocksList', authenticate, friendController.getAllBlocks);
-route.get('/', authenticate, friendController.getMutualFriends);
+// route.get('/friendsList', authenticate, friendController.getAllFriends);
+// route.get('/blocksList', authenticate, friendController.getAllBlocks);
+// route.get('/', authenticate, friendController.getMutualFriends);
 
-module.exports = route;
+// module.exports = route;

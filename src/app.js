@@ -7,7 +7,6 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const { MONGODB_URI, SESSION_SECRET, NODE_ENV } = require('./constant');
 const router = require('./index');
-const { NotFoundError } = require('./errors');
 const errorHandler = require('./middlewares/errorHandler');
 
 const app = express();
@@ -44,9 +43,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // routes
 app.use('/api/v1/', router);
-app.use((req, res, next) => {
-  next(new NotFoundError(`Can't find ${req.originalUrl} on this server.`, 404));
-});
+// app.use((req, res, next) => {
+//   next(new NotFoundError(`Can't find ${req.originalUrl} on this server.`, 404));
+// });
 app.use(errorHandler);
 
 module.exports = app;
