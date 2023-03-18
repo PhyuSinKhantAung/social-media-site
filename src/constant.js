@@ -23,12 +23,27 @@ exports.EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
 exports.EMAIL_HOST = process.env.EMAIL_HOST;
 exports.EMAIL_PORT = process.env.EMAIL_PORT;
 
-// CLOUDINARY_CLOUD_NAME= 'djzhcyuv3'
-// CLOUDINARY_API_KEY= '468183642671159'
-// CLOUDINARY_API_SECRET= 'IrVxLUCMcibY135KwQGT2K0mnxo'
-// CLOUDINARY_SECURE_DELIVERY_URL= https://res.cloudinary.com/djzhcyuv3
+exports.USER_ERRORS = {
+  USER_NOT_FOUND: { code: 404, message: 'User not found' },
+  USER_ALREADY_EXISTS: { code: 409, message: 'User already exists' },
+  NOT_AUTHENTICATED: { code: 401, message: 'You are not authenticated' },
+  WRONG_PASSWORD: { code: 400, message: 'Wrong Password' },
+};
 
-// EMAIL_USERNAME=b9850a546f8ca3
-// EMAIL_PASSWORD=6ef7f030b91a35
-// EMAIL_HOST=smtp.mailtrap.io
-// EMAIL_PORT=2525
+exports.EMAIL_ERRORS = {
+  EMAIL_FAILED: {
+    code: 421,
+    message: 'There is something went wrong while sending email.',
+  },
+};
+
+exports.OTP_ERRORS = {
+  WRONG_OTP: {
+    code: 400,
+    message: 'Wrong OTP',
+  },
+  EXPIRED_OTP: {
+    code: 400,
+    message: 'Your OTP was expired.',
+  },
+};

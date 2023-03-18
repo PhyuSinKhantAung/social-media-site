@@ -2,16 +2,13 @@ const { Schema, model, default: mongoose } = require('mongoose');
 
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
-const { BadRequestError, ApiError } = require('../errors');
 
 const userSchema = new Schema(
   {
-    username: String,
-    email: {
+    username: {
       type: String,
-      unique: true,
     },
-    phone: {
+    email: {
       type: String,
     },
     password: {

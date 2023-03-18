@@ -47,10 +47,10 @@ exports.deactivateMe = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.deleteMe = catchAsync(async (req, res, next) => {
-  await userService.deleteMe(req.user.id, res);
-  res.status(200).json({
-    code: 200,
-    data: null,
-  });
-});
+// exports.deleteMe = catchAsync(async (req, res, next) => {P
+//   await userService.deleteMe(req.user.id, res);
+//   res.status(200).json({
+//     code: 200,
+//     data: null,
+//   });
+// });

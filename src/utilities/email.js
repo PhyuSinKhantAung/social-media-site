@@ -4,8 +4,8 @@ const {
   EMAIL_PORT,
   EMAIL_USERNAME,
   EMAIL_PASSWORD,
+  EMAIL_ERRORS,
 } = require('../constant');
-const { ApiError } = require('../errors');
 
 const createTransport = () =>
   nodemailer.createTransport({
@@ -25,7 +25,7 @@ const sendMessage = async (messageConfiguration) => {
       ...messageConfiguration,
     });
   } catch (err) {
-    throw new ApiError('There is somthing went wrong while sending mail.', 400);
+    throw EMAIL_ERRORS.EMAIL_FAILED;
   }
 };
 

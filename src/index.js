@@ -7,11 +7,10 @@ const saveRouter = require('./routes/save.route');
 const userRouter = require('./routes/user.route');
 
 router.use('/auth', authRouter);
-router.use('/users', userRouter);
-router.use('/posts', postRouter);
-router.use('/friends', friendRouter);
+// s// router.use('/posts', postRouter);
+// router.use('/friends', friendRouter);
 
-router.use('/shares', shareRouter);
-router.use('/saves', saveRouter);
+// router.use('/shares', shareRouter);
+// router.use('/saves', saveRouter);
 
 module.exports = router;
