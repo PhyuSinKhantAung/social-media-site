@@ -5,10 +5,13 @@ const shareRouter = require('./routes/share.route');
 const friendRouter = require('./routes/friend.route');
 const saveRouter = require('./routes/save.route');
 const userRouter = require('./routes/user.route');
+const commentRouter = require('./routes/comment.route');
 
 router.use('/auth', authRouter);
 router.use('/users', userRouter);
-// router.use('/posts', postRouter);
+router.use('/posts', postRouter);
+router.use('/comments', commentRouter);
+
 // router.use('/friends', friendRouter);
 
 // router.use('/shares', shareRouter);

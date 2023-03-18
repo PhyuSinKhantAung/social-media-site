@@ -36,6 +36,7 @@ const upload = multer({
 });
 
 const uploadImages = upload.array('images', 10);
+
 const uploadProfilePic = upload.single('profile_pic');
 
 // const uploadImages = upload.fields([{ name: 'images', maxCount: 15 }]);

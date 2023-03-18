@@ -1,167 +1,173 @@
-// const Post = require('../models/post.model');
-// const User = require('../models/user.model');
-// const Share = require('../models/share.model');
-// const cloudinary = require('../library/cloudinaryConfig');
+const Post = require('../models/post.model');
+const User = require('../models/user.model');
+const Share = require('../models/sharePost.model');
+const cloudinary = require('../library/cloudinaryConfig');
+const { POST_ERRORS } = require('../constant');
 
-// const postService = {
-//   getAllposts: async (userId, reqQuery) => {
-//     const user = await User.findById(userId).select('+last_access');
-//     if (!user) throw new BadRequestError('There is no user with that id', 400);
+const postService = {
+  getAllposts: async (reqUser, reqQuery) => {
+    const user = await User.findById(reqUser.id).select('+last_access');
 
-//     const allPosts = await Post.find({ createdAt: { $gt: user.last_access } });
-//     const allShares = await Share.find({
-//       createdAt: { $gt: user.last_access },
-//     });
+    const allPosts = await Post.find({ createdAt: { $gt: user.last_access } });
 
-//     user.last_access = new Date();
-//     await user.save();
+    const allShares = await Share.find({
+      createdAt: { $gt: user.last_access },
+    });
 
-//     const unseenAllPostsAndShares = [...allShares, ...allPosts];
+    user.last_access = new Date();
+    await user.save();
 
-//     return unseenAllPostsAndShares;
-//   },
-//   getAllMyPosts: async (reqUser, reqQuery) => {
-//     const allShares = await Share.find({ sharedBy: reqUser.id });
-//     const allPosts = await Post.find({ user: reqUser.id }).sort('-createdAt');
+    const unseenAllPostsAndShares = [...allShares, ...allPosts];
 
-//     const allPostsAndShares = [...allShares, ...allPosts];
+    return unseenAllPostsAndShares;
+  },
 
-//     if (!allPostsAndShares)
-//       throw new BadRequestError(
-//         `You cannot get your posts with invalid user id`,
-//         400
-//       );
-//     return allPostsAndShares;
-//   },
-//   createPost: async (reqBody, reqUser, images = []) => {
-//     const imageUrlsArr = images.map((img) => ({
-//       url: img.path,
-//       public_id: img.filename,
-//     }));
+  getAllMyPosts: async (reqUser) => {
+    const allSharedPosts = await Share.find({ sharedBy: reqUser.id });
 
-//     // if user request was a string
-//     if (typeof reqBody.taggedUserIds === 'string') {
-//       const taggedUserIdsArray = reqBody.taggedUserIds.split(',');
-//       reqBody.taggedUserIds = taggedUserIdsArray;
-//     }
+    const allPosts = await Post.find({ post_creator: reqUser.id }).sort(
+      '-createdAt'
+    );
 
-//     // check tag user-id include or not in friend-list
-//     if (reqBody.taggedUserIds) {
-//       const tags = reqBody.taggedUserIds;
-//       const user = await User.findById(reqUser);
-//       const { friends } = user;
+    const allPostsAndSharedPosts = [...allSharedPosts, ...allPosts];
 
-//       const canTag = tags.filter((tagId) =>
-//         friends.some((friId) => friId.toString() === tagId)
-//       );
+    if (!allPostsAndSharedPosts) throw POST_ERRORS.POST_NOT_FOUND;
 
-//       if (canTag.length !== tags.length)
-//         throw new ApiError(
-//           'Tag user id does not exist in your friend list',
-//           400
-//         );
-//     }
+    return allPostsAndSharedPosts;
+  },
 
-//     const post = await (
-//       await Post.create({
-//         ...reqBody,
-//         user: reqUser.id,
-//         images: imageUrlsArr,
-//       })
-//     ).populate({
-//       path: 'user',
-//       select: 'name profile_pic',
-//     });
+  getPost: async (postId) => {
+    const post = await Post.findById(postId);
+    if (!post) throw POST_ERRORS.POST_NOT_FOUND;
+    return post;
+  },
 
-//     return post;
-//   },
+  createPost: async (reqBody, reqUser, images = []) => {
+    const imageUrlsArr = images.map((img) => ({
+      url: img.path,
+      public_id: img.filename,
+    }));
 
-//   updatePost: async (reqBody, reqUser, postId, images = []) => {
-//     const imageUrlsArr = images.map((img) => ({
-//       url: img.path,
-//       public_id: img.filename,
-//     }));
+    // if user request was a string
+    if (typeof reqBody.taggedUserIds === 'string') {
+      const taggedUserIdsArray = reqBody.taggedUserIds.split(',');
+      reqBody.taggedUserIds = taggedUserIdsArray;
+    }
 
-//     // if user request was a string
-//     if (typeof reqBody.taggedUserIds === 'string') {
-//       const taggedUserIdsArray = reqBody.taggedUserIds.split(',');
-//       reqBody.taggedUserIds = taggedUserIdsArray;
-//     }
+    // check tag user-id include or not in friend-list
+    if (reqBody.taggedUserIds) {
+      const tags = reqBody.taggedUserIds;
+      const user = await User.findById(reqUser);
+      const { friends } = user;
 
-//     // check tag user-id include or not in friend-list
-//     if (reqBody.taggedUserIds) {
-//       const tags = reqBody.taggedUserIds;
-//       const user = await User.findById(reqUser);
-//       const { friends } = user;
+      const canTag = tags.filter((tagId) =>
+        friends.some((friId) => friId.toString() === tagId)
+      );
 
-//       const canTag = tags.filter((tagId) =>
-//         friends.some((friId) => friId.toString() === tagId)
-//       );
+      if (canTag.length !== tags.length)
+        throw POST_ERRORS.TAGGED_USER_NOT_FOUND;
+    }
 
-//       if (canTag.length !== tags.length)
-//         throw new ApiError(
-//           'Tag user id does not exist in your friend list',
-//           400
-//         );
-//     }
+    const post = await (
+      await Post.create({
+        ...reqBody,
+        post_creator: reqUser.id,
+        images: imageUrlsArr,
+      })
+    ).populate({
+      path: 'post_creator',
+      select: 'username profile_pic',
+    });
 
-//     const post = await Post.findByIdAndUpdate(
-//       postId,
-//       { ...reqBody, $push: { images: { $each: imageUrlsArr } } },
-//       { new: true }
-//     );
-//     if (!post)
-//       throw new BadRequestError('The post with that id does not exist.', 400);
+    return post;
+  },
 
-//     return post;
-//   },
+  updatePost: async (reqBody, reqUser, postId, images = []) => {
+    const imageUrlsArr = images.map((img) => ({
+      url: img.path,
+      public_id: img.filename,
+    }));
 
-//   deleteImages: async (reqBody, postId) => {
-//     const post = await Post.findById(postId);
-//     if (!post)
-//       throw new BadRequestError('The post with that id does not exists.', 400);
+    // if user request was a string
+    if (typeof reqBody.taggedUserIds === 'string') {
+      const taggedUserIdsArray = reqBody.taggedUserIds.split(',');
+      reqBody.taggedUserIds = taggedUserIdsArray;
+    }
 
-//     const { deletedImages } = reqBody;
-//     if (!deletedImages)
-//       throw new ApiError(`This route is only for deleting post's images`, 400);
+    // check tag user-id include or not in friend-list
+    if (reqBody.taggedUserIds) {
+      const tags = reqBody.taggedUserIds;
+      const user = await User.findById(reqUser);
+      const { friends } = user;
 
-//     const hadToDeleteImageIdArr = post.images.filter((imgUrlObj) =>
-//       deletedImages.some((id) => id === imgUrlObj._id.toString())
-//     );
+      const canTag = tags.filter((tagId) =>
+        friends.some((friId) => friId.toString() === tagId)
+      );
 
-//     if (hadToDeleteImageIdArr.length !== deletedImages.length)
-//       throw new BadRequestError(
-//         `The Id you want to delete does not match with chosen image's id`,
-//         400
-//       );
+      if (canTag.length !== tags.length)
+        throw POST_ERRORS.TAGGED_USER_NOT_FOUND;
+    }
 
-//     const deletedImgPost = await Post.findByIdAndUpdate(
-//       postId,
-//       {
-//         $pullAll: { images: hadToDeleteImageIdArr },
-//       },
-//       { new: true, runValidators: true }
-//     );
+    const post = await Post.findById(postId);
+    if (!post) throw POST_ERRORS.POST_NOT_FOUND;
 
-//     // Delete from cloudinary
-//     hadToDeleteImageIdArr.forEach((urlObj) => {
-//       cloudinary.uploader.destroy(urlObj.public_id, (error, result) => {
-//         if (error) {
-//           throw new ApiError('Image deleting fails');
-//         }
-//       });
-//     });
+    if (post.post_creator._id.toString() !== reqUser.id) {
+      throw POST_ERRORS.OWNER_ONLY_ALLOWED;
+    }
 
-//     return deletedImgPost;
-//   },
+    const updatedPost = await Post.findByIdAndUpdate(
+      postId,
+      { ...reqBody, $push: { images: { $each: imageUrlsArr } } },
+      { new: true }
+    );
 
-//   deletePost: async (postId) => {
-//     await Post.findByIdAndDelete(postId);
-//   },
-//   getPost: async (postId) => {
-//     const post = await Post.findById(postId);
-//     return post;
-//   },
-// };
+    return updatedPost;
+  },
 
-// module.exports = postService;
+  deleteImages: async (reqBody, reqUser, postId) => {
+    const post = await Post.findById(postId);
+    if (!post) throw POST_ERRORS.POST_NOT_FOUND;
+
+    if (post.post_creator._id.toString() !== reqUser.id) {
+      throw POST_ERRORS.OWNER_ONLY_ALLOWED;
+    }
+
+    const { deletedImages } = reqBody;
+
+    const hadToDeleteImageIdArr = post.images.filter((imgUrlObj) =>
+      deletedImages.some((id) => id === imgUrlObj._id.toString())
+    );
+
+    if (hadToDeleteImageIdArr.length !== deletedImages.length)
+      throw POST_ERRORS.IMAGE_NOT_FOUND;
+
+    const deletedImgPost = await Post.findByIdAndUpdate(
+      postId,
+      {
+        $pullAll: { images: hadToDeleteImageIdArr },
+      },
+      { new: true, runValidators: true }
+    );
+
+    // Delete from cloudinary
+    hadToDeleteImageIdArr.forEach((urlObj) => {
+      cloudinary.uploader.destroy(urlObj.public_id, (error, result) => {
+        if (error) {
+          throw POST_ERRORS.DELETE_IMAGE_FAILS;
+        }
+      });
+    });
+
+    return deletedImgPost;
+  },
+
+  deletePost: async (postId, reqUser) => {
+    const post = await Post.findByIdAndDelete(postId);
+    if (!post) throw POST_ERRORS.POST_NOT_FOUND;
+    if (post.post_creator._id.toString() !== reqUser.id) {
+      throw POST_ERRORS.OWNER_ONLY_ALLOWED;
+    }
+  },
+};
+
+module.exports = postService;

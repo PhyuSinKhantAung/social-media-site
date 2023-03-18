@@ -39,20 +39,20 @@ const userSchema = new Schema(
         default: [],
       },
     ],
-    blocks: [
+    blocked_friends: [
       {
         type: mongoose.Schema.ObjectId,
         ref: 'User',
         default: [],
       },
     ],
-    saves: [
-      {
-        type: mongoose.Schema.ObjectId,
-        ref: 'Post',
-        default: [],
-      },
-    ],
+    // saves: [
+    //   {
+    //     type: mongoose.Schema.ObjectId,
+    //     ref: 'Post',
+    //     default: [],
+    //   },
+    // ],
 
     active: {
       type: Boolean,

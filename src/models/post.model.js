@@ -2,6 +2,10 @@ const { Schema, model, default: mongoose } = require('mongoose');
 
 const postSchema = new Schema(
   {
+    post_creator: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User',
+    },
     content: {
       type: String,
     },
@@ -11,6 +15,18 @@ const postSchema = new Schema(
         public_id: String,
       },
     ],
+    taggedUserIds: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+        default: [],
+      },
+    ],
+    audience: {
+      type: String,
+      enum: ['PUBLIC', 'FRIEND'],
+      default: 'PUBLIC',
+    },
     likes: [
       {
         type: mongoose.Schema.ObjectId,
@@ -20,30 +36,11 @@ const postSchema = new Schema(
     ],
     comments: [
       {
-        commented_by: {
-          type: mongoose.Schema.ObjectId,
-          ref: 'User',
-        },
-        text: String,
-      },
-    ],
-
-    taggedUserIds: [
-      {
         type: mongoose.Schema.ObjectId,
-        ref: 'User',
+        ref: 'Comment',
         default: [],
       },
     ],
-    user: {
-      type: mongoose.Schema.ObjectId,
-      ref: 'User',
-    },
-    audience: {
-      type: String,
-      enum: ['PUBLIC', 'FRIEND'],
-      default: 'PUBLIC',
-    },
   },
   {
     toJSON: { virtuals: true },
@@ -69,15 +66,14 @@ postSchema.pre('save', function (next) {
 });
 
 postSchema.pre(/^find/, function (next) {
-  this.populate({ path: 'user', select: 'username profile_pic' })
-    .populate({
-      path: 'taggedUserIds',
-      select: 'username profile_pic',
-    })
-    .populate({
-      path: 'comments.commented_by',
-      select: 'username profile_pic',
-    });
+  this.populate({
+    path: 'post_creator',
+    select: 'username profile_pic',
+  }).populate({
+    path: 'taggedUserIds',
+    select: 'username profile_pic',
+  });
+
   next();
 });
 

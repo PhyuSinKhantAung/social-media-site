@@ -1,74 +1,72 @@
-// const { ObjectId } = require('mongodb');
-// const { BadRequestError } = require('../errors');
+const Post = require('../models/post.model');
+const Comment = require('../models/comment.model');
+const { POST_ERRORS, COMMENT_ERRORS } = require('../constant');
 
-// const Post = require('../models/post.model');
-// const APIFeatures = require('../utilities/apiFeatures');
+const commentService = {
+  createComment: async (postId, reqBody, userId) => {
+    reqBody.commented_by = userId;
+    reqBody.commented_postId = postId;
+    const comment = await (
+      await Comment.create(reqBody)
+    ).populate({ path: 'commented_by', select: 'username profile_pic' });
 
-// const commentService = {
-//   createComment: async (postId, reqBody, userId) => {
-//     reqBody.commented_by = userId;
-//     const commentedPost = await Post.findByIdAndUpdate(
-//       postId,
-//       {
-//         $push: { comments: reqBody },
-//       },
-//       {
-//         new: true,
-//         runValidators: true,
-//       }
-//     )
-//       .populate({
-//         path: 'comments.commented_by',
-//         select: 'username profile_pic',
-//       })
-//       .populate({ path: 'user', select: 'name profile_pic' });
-//     if (!commentedPost)
-//       throw new BadRequestError('The post with that id does not exist.', 400);
-//     return commentedPost;
-//   },
-//   getAllComments: async (postId, reqQuery) => {
-//     const features = await new APIFeatures(Post.findById(postId), reqQuery)
-//       .limitFields()
-//       .paginate()
-//       .sort();
-//     const post = await features.query;
-//     if (!post)
-//       throw new BadRequestError('The post with that id does not exist.', 400);
-//     return post.comments;
-//   },
-//   updateComment: async (postId, commentId, reqBody) => {
-//     const post = await Post.findOneAndUpdate(
-//       { _id: ObjectId(postId), 'comments._id': ObjectId(commentId) },
-//       {
-//         $set: { 'comments.$.text': reqBody.text },
-//       },
-//       { new: true, runValidators: true }
-//     );
+    const post = await Post.findByIdAndUpdate(
+      postId,
+      {
+        $push: { comments: comment._id },
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+    if (!post) throw POST_ERRORS.POST_NOT_FOUND;
 
-//     if (!post)
-//       throw new BadRequestError('The post with that id does not exist.', 400);
+    return comment;
+  },
+  getAllComments: async (postId) => {
+    const post = await Post.findById(postId);
+    if (!post) throw POST_ERRORS.POST_NOT_FOUND;
 
-//     const updatedComment = post.comments.find(
-//       (el) => el._id.toString() === commentId
-//     );
+    const comments = await Comment.find({ commented_postId: postId }).populate({
+      path: 'commented_by',
+      select: 'username profile_pic',
+    });
+    return comments;
+  },
+  updateComment: async (commentId, reqBody, reqUser) => {
+    const comment = await Comment.findById(commentId);
+    if (!comment) throw COMMENT_ERRORS.COMMENT_NOT_FOUND;
 
-//     return updatedComment;
-//   },
-//   deleteComment: async (postId, commentId) => {
-//     const post = await Post.findOneAndUpdate(
-//       { _id: ObjectId(postId), 'comments._id': ObjectId(commentId) },
-//       {
-//         $pull: { comments: { _id: commentId } },
-//       },
-//       {
-//         new: true,
-//         runValidators: true,
-//       }
-//     );
-//     if (!post)
-//       throw new BadRequestError('The post with that id does not exist.', 400);
-//     return post;
-//   },
-// };
+    if (comment.commented_by.toString() !== reqUser.id)
+      throw COMMENT_ERRORS.OWNER_ONLY_ALLOWED;
 
-// module.exports = commentService;
+    const updatedComment = await Comment.findByIdAndUpdate(commentId, reqBody, {
+      new: true,
+      runValidators: true,
+    }).populate({
+      path: 'commented_by',
+      select: 'username profile_pic',
+    });
+
+    return updatedComment;
+  },
+  deleteComment: async (postId, commentId) => {
+    const comment = await Comment.findByIdAndDelete(commentId);
+    if (!comment) throw COMMENT_ERRORS.COMMENT_NOT_FOUND;
+
+    const post = await Post.findByIdAndUpdate(
+      postId,
+      {
+        $pull: { comments: commentId },
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+    if (!post) throw POST_ERRORS.POST_NOT_FOUND;
+  },
+};
+
+module.exports = commentService;
