@@ -90,3 +90,30 @@ exports.COMMENT_ERRORS = {
     message: 'You are not allowed.',
   },
 };
+
+exports.FRIEND_REQUEST_ERRORS = {
+  NOT_ADD_YOURSELF: {
+    code: 400,
+    message: 'You cannot add friend yourself.',
+  },
+  USER_BLOCKED: {
+    code: 404,
+    message: 'You have been blocked by this user.',
+  },
+  CONFILCT_FRIEND_REQUEST: {
+    code: 500,
+    message: 'There is something went wrong while adding friend.',
+  },
+  REQUEST_NOT_FOUND: {
+    code: 404,
+    message: 'Request not found.',
+  },
+  FRIEND_USER_NOT_FOUND: {
+    code: 404,
+    message: 'User is not your friends-list',
+  },
+  BLOCKED_USER_NOT_FOUND: {
+    code: 404,
+    message: 'User is not your blocked-list.',
+  },
+};

@@ -11,8 +11,7 @@ router.use('/auth', authRouter);
 router.use('/users', userRouter);
 router.use('/posts', postRouter);
 router.use('/comments', commentRouter);
-
-// router.use('/friends', friendRouter);
+router.use('/friends', friendRouter);
 
 // router.use('/shares', shareRouter);
 // router.use('/saves', saveRouter);

@@ -60,7 +60,7 @@ const userSchemas = {
   }),
 
   idSchema: Joi.object({
-    postId: Joi.objectid().required(),
+    id: Joi.objectid().required(),
   }),
 
   updateUserSchema: Joi.object({

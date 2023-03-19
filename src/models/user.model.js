@@ -39,7 +39,14 @@ const userSchema = new Schema(
         default: [],
       },
     ],
-    blocked_friends: [
+    blocked_users: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+        default: [],
+      },
+    ],
+    blockers: [
       {
         type: mongoose.Schema.ObjectId,
         ref: 'User',
