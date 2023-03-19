@@ -1,10 +1,11 @@
 const route = require('express').Router();
 const userController = require('../controllers/user.controller');
-const friendRouter = require('./friend.route');
 const authenticate = require('../middlewares/authenticate');
 const { validateBody, validateParams } = require('../middlewares/validation');
 const { uploadProfilePic } = require('../library/multer');
 const userSchemas = require('../schemas/user.schema');
+const friendController = require('../controllers/friend.controller');
+const friendSchema = require('../schemas/friend.schema');
 
 route.get('/', authenticate, userController.getAllUsers);
 route.get('/me', authenticate, userController.getMe);
@@ -26,7 +27,11 @@ route.patch(
 
 route.delete('/me/deactivate', authenticate, userController.deactivateMe);
 
-// users/:userId/mutualFriends / GET Method
-// route.use('/:id/mutualFriends', friendRouter);
+route.get(
+  '/:id/mutualFriends',
+  authenticate,
+  validateParams(friendSchema.idSchema),
+  friendController.getMutualFriends
+);
 
 module.exports = route;

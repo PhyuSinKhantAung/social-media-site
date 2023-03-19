@@ -1,4 +1,4 @@
-const route = require('express').Router({ mergeParams: true });
+const route = require('express').Router();
 const commentController = require('../controllers/comment.controller');
 const authenticate = require('../middlewares/authenticate');
 const { validateBody, validateParams } = require('../middlewares/validation');

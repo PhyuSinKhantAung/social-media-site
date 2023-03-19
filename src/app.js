@@ -43,9 +43,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // routes
 app.use('/api/v1/', router);
-// app.use((req, res, next) => {
-//   next(new NotFoundError(`Can't find ${req.originalUrl} on this server.`, 404));
-// });
+app.use((req, res, next) => {
+  next({ code: 404, message: `Can't find ${req.originalUrl} on this server.` });
+});
 app.use(errorHandler);
 
 module.exports = app;

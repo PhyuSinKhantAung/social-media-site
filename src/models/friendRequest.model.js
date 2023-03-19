@@ -1,29 +1,17 @@
 const { Schema, model, default: mongoose } = require('mongoose');
 
-const friendSchema = new Schema({
+const friendRequestSchema = new Schema({
   receiverId: {
     type: mongoose.Schema.ObjectId,
     ref: 'User',
   },
 
-  requesterId: {
+  senderId: {
     type: mongoose.Schema.ObjectId,
     ref: 'User',
   },
-  relationship: {
-    type: String,
-    default: 'REQUEST',
-  },
 });
 
-friendSchema.pre(/^find/, function (next) {
-  this.populate({
-    path: 'requesterId',
-    select: 'username profile_pic',
-  });
-  next();
-});
+const Request = model('Request', friendRequestSchema);
 
-const Friend = model('Friend', friendSchema);
-
-module.exports = Friend;
+module.exports = Request;

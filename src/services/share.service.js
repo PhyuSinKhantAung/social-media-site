@@ -1,42 +1,56 @@
-// const { ObjectId } = require('mongodb');
-// const { BadRequestError } = require('../errors');
-// const Post = require('../models/post.model');
-// const User = require('../models/share.model');
-// const Share = require('../models/share.model');
+const { ObjectId } = require('mongodb');
+const Post = require('../models/post.model');
+const Share = require('../models/sharePost.model');
+const { POST_ERRORS, SHARE_POST_ERRORS } = require('../constant');
 
-// const shareService = {
-//   createShare: async (postId, userId, reqBody) => {
-//     const post = await Post.findById(postId);
-//     if (!post) throw new BadRequestError('There is no post with that id.', 400);
-//     const sharedPost = await Share.create({
-//       ...reqBody,
-//       post: ObjectId(postId),
-//       sharedBy: ObjectId(userId),
-//     });
-//     return sharedPost;
-//   },
-//   updateShare: async (sharePostId, reqBody) => {
-//     if (!(await Share.findById(sharePostId)))
-//       throw new BadRequestError('There is no post with that id', 400);
-//     const updatedSharedPost = await Share.findByIdAndUpdate(
-//       sharePostId,
-//       reqBody,
-//       { runValidators: true, new: true }
-//     );
+const shareService = {
+  createShare: async (postId, userId, reqBody) => {
+    const post = await Post.findById(postId);
 
-//     return updatedSharedPost;
-//   },
-//   deleteShare: async (sharePostId) => {
-//     if (!(await Share.findById(sharePostId)))
-//       throw new BadRequestError('There is no post with that id', 400);
-//     await Share.findByIdAndDelete(sharePostId);
-//   },
-//   getSharedPost: async (sharePostId) => {
-//     const sharedPost = await Share.findById(sharePostId);
-//     if (!sharedPost)
-//       throw new BadRequestError('There is no shared post with that id', 400);
-//     return sharedPost;
-//   },
-// };
+    if (!post) throw POST_ERRORS.POST_NOT_FOUND;
 
-// module.exports = shareService;
+    await Share.create({
+      ...reqBody,
+      post: ObjectId(postId),
+      sharedBy: ObjectId(userId),
+    });
+  },
+
+  updateShare: async (sharePostId, userId, reqBody) => {
+    const sharePost = await Share.findById(sharePostId);
+
+    if (!sharePost) throw SHARE_POST_ERRORS.SHARE_POST_NOT_FOUND;
+
+    if (sharePost.sharedBy._id.toString() !== userId)
+      throw POST_ERRORS.OWNER_ONLY_ALLOWED;
+
+    const updatedSharedPost = await Share.findByIdAndUpdate(
+      sharePostId,
+      reqBody,
+      { runValidators: true, new: true }
+    );
+
+    return updatedSharedPost;
+  },
+
+  deleteShare: async (sharePostId, userId) => {
+    const sharePost = await Share.findById(sharePostId);
+
+    if (!sharePost) throw SHARE_POST_ERRORS.SHARE_POST_NOT_FOUND;
+
+    if (sharePost.sharedBy._id.toString() !== userId)
+      throw POST_ERRORS.OWNER_ONLY_ALLOWED;
+
+    await Share.findByIdAndDelete(sharePostId);
+  },
+
+  getSharedPost: async (sharePostId) => {
+    const sharedPost = await Share.findById(sharePostId);
+
+    if (!sharedPost) throw SHARE_POST_ERRORS.SHARE_POST_NOT_FOUND;
+
+    return sharedPost;
+  },
+};
+
+module.exports = shareService;

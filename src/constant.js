@@ -90,3 +90,60 @@ exports.COMMENT_ERRORS = {
     message: 'You are not allowed.',
   },
 };
+
+exports.FRIEND_REQUEST_ERRORS = {
+  NOT_ADD_YOURSELF: {
+    code: 400,
+    message: 'You cannot add friend yourself.',
+  },
+  USER_BLOCKED: {
+    code: 404,
+    message: 'You have been blocked by this user.',
+  },
+  CONFILCT_FRIEND_REQUEST: {
+    code: 500,
+    message: 'There is something went wrong while adding friend.',
+  },
+  REQUEST_NOT_FOUND: {
+    code: 404,
+    message: 'Request not found.',
+  },
+  FRIEND_USER_NOT_FOUND: {
+    code: 404,
+    message: 'User is not your friends-list',
+  },
+  BLOCKED_USER_NOT_FOUND: {
+    code: 404,
+    message: 'User is not your blocked-list.',
+  },
+};
+
+exports.LIKE_ERRORS = {
+  ALREADY_LIKED: {
+    code: 500,
+    message: 'You have already liked this post.',
+  },
+  LIKE_NOT_FOUND: {
+    code: 404,
+    message: 'Like not found.',
+  },
+};
+
+exports.SHARE_POST_ERRORS = {
+  SHARE_POST_NOT_FOUND: {
+    code: 404,
+    message: 'Share post not found.',
+  },
+};
+
+exports.SAVED_POST_ERRORS = {
+  SAVED_POST_NOT_FOUND: {
+    code: 404,
+    message: 'Saved post not found.',
+  },
+
+  ALREADY_SAVED: {
+    code: 500,
+    message: 'You have already saved this post.',
+  },
+};

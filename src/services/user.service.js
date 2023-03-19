@@ -1,4 +1,3 @@
-const { ObjectId } = require('mongodb');
 const { BLOCK_USER_ERRORS, USER_ERRORS } = require('../constant');
 
 const User = require('../models/user.model');
@@ -13,13 +12,16 @@ const userService = {
 
     const users = await User.find(queryObj);
 
-    const isBlocked = users.some((user) =>
-      user.blocks.includes(ObjectId(ownId))
+    const filteredBlockedUsers = users.filter((user) =>
+      user.blocked_users.every(
+        (blockedUserId) => blockedUserId.toString() !== ownId
+      )
+    );
+    const filteredBlockers = filteredBlockedUsers.filter((user) =>
+      user.blockers.every((blockerId) => blockerId.toString() !== ownId)
     );
 
-    if (isBlocked) throw BLOCK_USER_ERRORS.USER_NOT_FOUND;
-
-    return users;
+    return filteredBlockers;
   },
 
   getUserById: async (userId, ownId) => {
@@ -29,7 +31,7 @@ const userService = {
 
     if (user.active === false) throw USER_ERRORS.USER_NOT_FOUND;
 
-    if (user.blocks.find((blockedId) => blockedId.toString() === ownId))
+    if (user.blocked_users.find((blockedId) => blockedId.toString() === ownId))
       throw BLOCK_USER_ERRORS.USER_NOT_FOUND;
 
     return user;

@@ -1,13 +1,29 @@
-// const route = require('express').Router({ mergeParams: true });
-// const saveController = require('../controllers/save.controller');
-// const authentication = require('../middlewares/authenticate');
+const route = require('express').Router();
+const saveController = require('../controllers/save.controller');
+const authentication = require('../middlewares/authenticate');
+const { validateParams } = require('../middlewares/validation');
+const savedPostSchema = require('../schemas/savedPost.schema');
 
-// route.get('/', authentication, saveController.getAllSavedPosts);
+route.get('/', authentication, saveController.getAllSavedPosts);
 
-// route.post('/', authentication, saveController.createSave); //merged with post route
+route.post(
+  '/:id',
+  authentication,
+  validateParams(savedPostSchema.idSchema),
+  saveController.createSave
+);
+route.delete(
+  '/:id',
+  authentication,
+  validateParams(savedPostSchema.idSchema),
+  saveController.unsaved
+);
 
-// route.get('/:id', authentication, saveController.getSavedPost);
+route.get(
+  '/:id',
+  authentication,
+  validateParams(savedPostSchema.idSchema),
+  saveController.getSavedPost
+);
 
-// route.delete('/:id', authentication, saveController.unsaved);
-
-// module.exports = route;
+module.exports = route;

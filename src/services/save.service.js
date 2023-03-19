@@ -1,54 +1,55 @@
-// const { ApiError } = require('../errors');
-// const Post = require('../models/post.model');
-// const User = require('../models/user.model');
+const { POST_ERRORS, SAVED_POST_ERRORS } = require('../constant');
+const Post = require('../models/post.model');
+const Save = require('../models/savedPost.model');
 
-// const saveService = {
-//   createSave: async (userId, postId) => {
-//     const savedPost = await Post.findById(postId);
+const saveService = {
+  createSave: async (postId, userId) => {
+    const post = await Post.findById(postId);
 
-//     if (!savedPost) throw new ApiError('There is no post with that id', 400);
+    if (!post) throw POST_ERRORS.POST_NOT_FOUND;
 
-//     const user = await User.findByIdAndUpdate(
-//       userId,
-//       {
-//         $addToSet: { saves: postId },
-//       },
-//       { runValidators: true, new: true }
-//     ).populate('saves');
+    const isSaved = await Save.findOne({ post: postId, savedBy: userId });
+    if (isSaved) throw SAVED_POST_ERRORS.ALREADY_SAVED;
 
-//     if (!user) throw new ApiError('There is no user with that id', 400);
-//     return savedPost;
-//   },
-//   unsaved: async (userId, postId) => {
-//     if (!(await Post.findById(postId)))
-//       throw new ApiError('There is no post with that id', 400);
+    await Save.create({
+      post: postId,
+      savedBy: userId,
+    });
+  },
 
-//     const user = await User.findByIdAndUpdate(
-//       userId,
-//       {
-//         $pull: { saves: postId },
-//       },
-//       { runValidators: true, new: true }
-//     ).populate('saves');
+  unsaved: async (postId, userId) => {
+    const post = await Post.findById(postId);
 
-//     if (!user) throw new ApiError('There is no user with that id', 400);
+    if (!post) throw POST_ERRORS.POST_NOT_FOUND;
 
-//     return user.saves;
-//   },
-//   getAllSavedPosts: async (userId) => {
-//     const user = await User.findById(userId).populate('saves');
-//     if (!user) throw new ApiError('There is no user with that id', 400);
-//     return user.saves;
-//   },
-//   getSavedPost: async (userId, postId) => {
-//     const user = await User.findById(userId).populate('saves');
-//     const savedPost = user.saves.find(
-//       (savePost) => savePost.id.toString() === postId
-//     );
-//     if (!savedPost)
-//       throw new ApiError('There is no saved post with that id', 400);
-//     return savedPost;
-//   },
-// };
+    const savedPost = await Save.findOneAndDelete({
+      post: postId,
+      savedBy: userId,
+    });
 
-// module.exports = saveService;
+    if (!savedPost) throw SAVED_POST_ERRORS.SAVED_POST_NOT_FOUND;
+  },
+
+  getAllSavedPosts: async (userId) => {
+    const savedPosts = await Save.find({ savedBy: userId }).populate('post');
+
+    if (!savedPosts) throw SAVED_POST_ERRORS.SAVED_POST_NOT_FOUND;
+
+    return savedPosts;
+  },
+
+  getSavedPost: async (postId, userId) => {
+    const savedPost = await Save.findOne({
+      post: postId,
+      savedBy: userId,
+    })
+      .populate('post')
+      .populate({ path: 'savedBy', select: 'username profile_pic' });
+
+    if (!savedPost) throw SAVED_POST_ERRORS.SAVED_POST_NOT_FOUND;
+
+    return savedPost;
+  },
+};
+
+module.exports = saveService;

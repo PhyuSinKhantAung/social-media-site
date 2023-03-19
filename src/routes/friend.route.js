@@ -1,23 +1,59 @@
-// const route = require('express').Router({ mergeParams: true });
-// const friendController = require('../controllers/friend.controller');
-// const authenticate = require('../middlewares/authenticate');
+const route = require('express').Router();
+const friendController = require('../controllers/friend.controller');
+const authenticate = require('../middlewares/authenticate');
+const { validateParams } = require('../middlewares/validation');
+const friendSchema = require('../schemas/friend.schema');
 
-// route.post('/addFriend/:id', authenticate, friendController.addFriend);
-// route.get(
-//   '/friendRequests',
-//   authenticate,
-//   friendController.getAllFriendRequests
-// );
+route.post(
+  '/addFriend/:id',
+  authenticate,
+  validateParams(friendSchema.idSchema),
+  friendController.addFriend
+);
 
-// route.post('/confirmFriend/:id', authenticate, friendController.confirmFriend);
-// route.post('/cancelRequest/:id', authenticate, friendController.cancelRequest);
+route.get(
+  '/friendRequests',
+  authenticate,
+  friendController.getAllFriendRequests
+);
 
-// route.post('/unfriend/:id', authenticate, friendController.unfriend);
-// route.post('/block/:id', authenticate, friendController.blockFriend);
-// route.delete('/unblock/:id', authenticate, friendController.unblockFriend);
+route.post(
+  '/confirmFriend/:id',
+  authenticate,
+  validateParams(friendSchema.idSchema),
+  friendController.confirmFriend
+);
 
-// route.get('/friendsList', authenticate, friendController.getAllFriends);
-// route.get('/blocksList', authenticate, friendController.getAllBlocks);
-// route.get('/', authenticate, friendController.getMutualFriends);
+route.post(
+  '/cancelRequest/:id',
+  authenticate,
+  validateParams(friendSchema.idSchema),
+  friendController.cancelRequest
+);
 
-// module.exports = route;
+route.post(
+  '/unfriend/:id',
+  authenticate,
+  validateParams(friendSchema.idSchema),
+  friendController.unfriend
+);
+
+route.post(
+  '/block/:id',
+  authenticate,
+  validateParams(friendSchema.idSchema),
+  friendController.blockUser
+);
+
+route.delete(
+  '/unblock/:id',
+  authenticate,
+  validateParams(friendSchema.idSchema),
+  friendController.unblockUser
+);
+
+route.get('/', authenticate, friendController.getAllFriends);
+
+route.get('/blocksList', authenticate, friendController.getAllBlockedUsers);
+
+module.exports = route;

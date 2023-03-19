@@ -1,266 +1,230 @@
-// const { BadRequestError, ApiError } = require('../errors');
-// const Friend = require('../models/friend.model');
-// const User = require('../models/user.model');
+const { ObjectId } = require('mongodb');
+const { USER_ERRORS, FRIEND_REQUEST_ERRORS } = require('../constant');
+const Request = require('../models/friendRequest.model');
+const User = require('../models/user.model');
 
-// const friendService = {
-//   addFriend: async (wantToaddId, userId) => {
-//     const user = await User.findById(wantToaddId);
-//     if (!user)
-//       throw new BadRequestError('The user with that id does not exist.', 400);
+const friendService = {
+  addFriend: async (receiverId, senderId) => {
+    const user = await User.findById(receiverId);
 
-//     if (wantToaddId === userId)
-//       throw new BadRequestError('You cannot add by yourself.', 400);
+    if (!user) throw USER_ERRORS.USER_NOT_FOUND;
 
-//     const isUserBlock = user.blocks.find(
-//       (blockId) => blockId.toString() === userId
-//     );
-//     if (isUserBlock)
-//       throw new BadRequestError('You have been blocked by this user.', 400);
+    if (receiverId === senderId) throw FRIEND_REQUEST_ERRORS.NOT_ADD_YOURSELF;
 
-//     const isRequested = await Friend.findOne({
-//       $or: [
-//         {
-//           receiverId: wantToaddId, //rolly => ps
-//           requesterId: userId, // ps => rolly
-//         },
-//         { receiverId: userId, requesterId: wantToaddId },
-//       ],
-//     });
-//     if (isRequested)
-//       throw new BadRequestError(
-//         'There is something wrong while adding friend.',
-//         400
-//       );
+    const isUserBlock = user.blocked_users.find(
+      (blockedFriendId) => blockedFriendId.toString() === senderId
+    );
 
-//     await Friend.create({
-//       receiverId: wantToaddId,
-//       requesterId: userId,
-//     });
+    if (isUserBlock) throw FRIEND_REQUEST_ERRORS.USER_BLOCKED;
 
-//     // return addFriendInfo;
-//   },
-//   getAllFriendRequests: async (userId) => {
-//     const friendRequests = await Friend.find({
-//       receiverId: userId,
-//       relationship: 'REQUEST',
-//     }).select('-receiverId');
-//     if (!friendRequests)
-//       throw new BadRequestError(
-//         'User id is invalid or There is no request with that id',
-//         400
-//       );
-//     return friendRequests;
-//   },
-//   confirmFriend: async (wantToConfirmId, userId) => {
-//     const request = await Friend.findOneAndUpdate(
-//       {
-//         receiverId: userId,
-//         requesterId: wantToConfirmId,
-//         relationship: 'REQUEST',
-//       },
-//       { relationship: 'FRIEND' },
-//       { new: true }
-//     );
+    const isRequested = await Request.findOne({
+      $or: [
+        {
+          receiverId: receiverId, //rolly => pos
+          senderId: senderId, // ps => rolly
+        },
+        {
+          receiverId: senderId,
+          requesterId: receiverId,
+        },
+      ],
+    });
 
-//     if (!request) throw new ApiError('There is no request with those ids', 400);
+    if (isRequested) throw FRIEND_REQUEST_ERRORS.CONFILCT_FRIEND_REQUEST;
 
-//     const confirmFriend = await User.findByIdAndUpdate(
-//       userId,
-//       {
-//         $addToSet: { friends: wantToConfirmId },
-//       },
-//       { new: true, runValidators: true }
-//     );
-//     // also push userId into wantToConfirm user's friends field
-//     await User.findByIdAndUpdate(
-//       wantToConfirmId,
-//       {
-//         $addToSet: { friends: userId },
-//       },
-//       { new: true, runValidators: true }
-//     );
+    await Request.create({
+      receiverId,
+      senderId,
+    });
+  },
 
-//     return confirmFriend;
-//   },
-//   cancelRequest: async (wantToDeclinedId, userId) => {
-//     await Friend.findOneAndDelete({
-//       $or: [
-//         {
-//           receiverId: wantToDeclinedId, // ps
-//           requesterId: userId, // rolly
-//           relationship: 'REQUEST',
-//         },
-//         {
-//           receiverId: userId,
-//           requesterId: wantToDeclinedId,
-//           relationship: 'REQUEST',
-//         },
-//       ],
-//     });
-//   },
+  getAllFriendRequests: async (userId) => {
+    const friendRequests = await Request.find({
+      receiverId: userId,
+    })
+      .select('-receiverId')
+      .populate({
+        path: 'senderId',
+        select: 'username profile_pic',
+      });
 
-//   unfriend: async (wantToUnfriId, userId) => {
-//     const relation = await Friend.findOneAndDelete({
-//       $or: [
-//         {
-//           receiverId: userId,
-//           requesterId: wantToUnfriId,
-//           relationship: 'FRIEND',
-//         },
-//         {
-//           receiverId: wantToUnfriId,
-//           requesterId: userId,
-//           relationship: 'FRIEND',
-//         },
-//       ],
-//     });
+    if (!friendRequests) throw FRIEND_REQUEST_ERRORS.REQUEST_NOT_FOUND;
 
-//     if (!relation)
-//       throw new ApiError('You cannot unfriend without being friend.', 400);
+    return friendRequests;
+  },
 
-//     const unfriend = await User.findByIdAndUpdate(
-//       userId,
-//       {
-//         $pull: { friends: wantToUnfriId },
-//       },
-//       { new: true, runValidators: true }
-//     );
+  confirmFriend: async (senderId, receiverId) => {
+    const request = await Request.findOneAndDelete({
+      receiverId: receiverId,
+      senderId: senderId,
+    });
 
-//     // also pull userId into wantToUnfri user's friends field
-//     await User.findByIdAndUpdate(
-//       wantToUnfriId,
-//       {
-//         $pull: { friends: userId },
-//       },
-//       { new: true, runValidators: true }
-//     );
+    if (!request) throw FRIEND_REQUEST_ERRORS.REQUEST_NOT_FOUND;
 
-//     return unfriend;
-//   },
+    await User.findByIdAndUpdate(
+      receiverId,
+      {
+        $addToSet: { friends: senderId },
+      },
+      { new: true, runValidators: true }
+    );
 
-//   blockFriend: async (wantToBlockId, userId) => {
-//     const relationBetween = await Friend.findOneAndUpdate(
-//       {
-//         $or: [
-//           {
-//             receiverId: userId,
-//             requesterId: wantToBlockId,
-//           },
-//           {
-//             receiverId: wantToBlockId,
-//             requesterId: userId,
-//           },
-//         ],
-//       },
-//       {
-//         receiverId: wantToBlockId,
-//         requesterId: userId,
-//         relationship: 'BLOCK',
-//       },
-//       {
-//         new: true,
-//         runValidators: true,
-//       }
-//     );
+    // also push userId into wantToConfirm user's friends field
+    await User.findByIdAndUpdate(
+      senderId,
+      {
+        $addToSet: { friends: receiverId },
+      },
+      { new: true, runValidators: true }
+    );
+  },
 
-//     if (!relationBetween) {
-//       await Friend.create({
-//         receiverId: wantToBlockId,
-//         requesterId: userId,
-//         relationship: 'BLOCK',
-//       });
-//     }
+  cancelRequest: async (senderId, receiverId) => {
+    await Request.findOneAndDelete({
+      $or: [
+        {
+          receiverId: receiverId,
+          senderId: senderId,
+        },
+        {
+          receiverId: senderId,
+          senderId: receiverId,
+        },
+      ],
+    });
+  },
 
-//     await User.findByIdAndUpdate(
-//       userId,
-//       {
-//         $pull: { friends: wantToBlockId },
-//       },
-//       {
-//         new: true,
-//         runValidators: true,
-//       }
-//     );
+  unfriend: async (senderId, receiverId) => {
+    const user = await User.findById(receiverId);
+    const isFriend = user.friends.includes(ObjectId(senderId));
 
-//     await User.findByIdAndUpdate(
-//       userId,
-//       { $addToSet: { blocks: wantToBlockId } },
-//       {
-//         runValidators: true,
-//         new: true,
-//       }
-//     );
-//   },
+    if (!isFriend) throw FRIEND_REQUEST_ERRORS.FRIEND_USER_NOT_FOUND;
 
-//   unblock: async (wantToUnblockId, userId) => {
-//     const isBlock = await Friend.findOneAndDelete({
-//       $or: [
-//         {
-//           receiverId: userId,
-//           requesterId: wantToUnblockId,
-//           relationship: 'BLOCK',
-//         },
-//         {
-//           receiverId: wantToUnblockId,
-//           requesterId: userId,
-//           relationship: 'BLOCK',
-//         },
-//       ],
-//     });
+    await User.findByIdAndUpdate(
+      receiverId,
+      {
+        $pull: { friends: senderId },
+      },
+      { new: true, runValidators: true }
+    );
 
-//     if (!isBlock)
-//       throw new BadRequestError(
-//         'You cannot unblock this user without blocking.',
-//         400
-//       );
+    // also pull userId into wantToUnfri user's friends field
+    await User.findByIdAndUpdate(
+      senderId,
+      {
+        $pull: { friends: receiverId },
+      },
+      { new: true, runValidators: true }
+    );
+  },
 
-//     await User.findByIdAndUpdate(
-//       userId,
-//       {
-//         $pull: { blocks: wantToUnblockId },
-//       },
-//       {
-//         new: true,
-//         runValidators: true,
-//       }
-//     );
+  blockUser: async (blockedUserId, blockerId) => {
+    const user = await User.findById(blockedUserId);
 
-//     const unblockFriend = await User.findById(wantToUnblockId);
+    if (!user) throw USER_ERRORS.USER_NOT_FOUND;
 
-//     return unblockFriend;
-//   },
+    await User.findByIdAndUpdate(
+      blockerId,
+      {
+        $pull: { friends: blockedUserId },
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
 
-//   getAllFriends: async (userId) => {
-//     const user = await User.findById(userId).populate({
-//       path: 'friends',
-//       select: 'username profile_pic',
-//     });
-//     return user.friends;
-//   },
-//   getAllBlocks: async (userId) => {
-//     const user = await User.findById(userId).populate({
-//       path: 'blocks',
-//       select: 'username profile_pic',
-//     });
-//     return user.blocks;
-//   },
-//   getMutualFriends: async (ownId, userId) => {
-//     const user = await User.findById(userId);
-//     if (!user) throw new BadRequestError('There is no user with that id', 400);
+    await User.findByIdAndUpdate(
+      blockedUserId,
+      {
+        $pull: { friends: blockerId },
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
 
-//     const me = await User.findById(ownId);
-//     if (!me) throw new BadRequestError('There is no user with that id', 400);
+    await User.findByIdAndUpdate(
+      blockerId,
+      { $addToSet: { blocked_users: blockedUserId } },
+      {
+        runValidators: true,
+        new: true,
+      }
+    );
 
-//     const mutualFriends = user.friends.filter((userFriId) =>
-//       me.friends.some((myFriId) => myFriId.toString() === userFriId.toString())
-//     );
+    await User.findByIdAndUpdate(
+      blockedUserId,
+      { $addToSet: { blockers: blockerId } },
+      {
+        runValidators: true,
+        new: true,
+      }
+    );
+  },
 
-//     const updatedUser = await User.findByIdAndUpdate(userId, {
-//       $set: { mutual_friends: mutualFriends },
-//     }).populate({ path: 'mutual_friends', select: 'username profile_pic' });
+  unblockUser: async (unblockedUserId, unblockerId) => {
+    const user = await User.findById(unblockerId);
 
-//     return updatedUser.mutual_friends;
-//   },
-// };
+    const isBlock = user.blocked_users.includes(ObjectId(unblockedUserId));
 
-// module.exports = friendService;
+    if (!isBlock) throw FRIEND_REQUEST_ERRORS.BLOCKED_USER_NOT_FOUND;
+
+    await User.findByIdAndUpdate(
+      unblockerId,
+      {
+        $pull: { blocked_users: unblockedUserId },
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    await User.findByIdAndUpdate(
+      unblockedUserId,
+      { $pull: { blockers: unblockerId } },
+      {
+        runValidators: true,
+        new: true,
+      }
+    );
+  },
+
+  getAllFriends: async (userId) => {
+    const user = await User.findById(userId).populate({
+      path: 'friends',
+      select: 'username profile_pic',
+    });
+    return user.friends;
+  },
+
+  getAllBlockedUsers: async (userId) => {
+    const user = await User.findById(userId).populate({
+      path: 'blocked_users',
+      select: 'username profile_pic',
+    });
+    return user.blocked_users;
+  },
+
+  getMutualFriends: async (targetUserId, myId) => {
+    const user = await User.findById(targetUserId);
+
+    if (!user) throw USER_ERRORS.USER_NOT_FOUND;
+
+    const me = await User.findById(myId);
+
+    const mutualFriends = user.friends.filter((userFriId) =>
+      me.friends.some((myFriId) => myFriId.toString() === userFriId.toString())
+    );
+
+    const updatedUser = await User.findByIdAndUpdate(targetUserId, {
+      $set: { mutual_friends: mutualFriends },
+    }).populate({ path: 'mutual_friends', select: 'username profile_pic' });
+
+    return updatedUser.mutual_friends;
+  },
+};
+
+module.exports = friendService;

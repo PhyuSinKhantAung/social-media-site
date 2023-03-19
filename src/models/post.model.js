@@ -65,18 +65,6 @@ postSchema.pre('save', function (next) {
   return next;
 });
 
-postSchema.pre(/^find/, function (next) {
-  this.populate({
-    path: 'post_creator',
-    select: 'username profile_pic',
-  }).populate({
-    path: 'taggedUserIds',
-    select: 'username profile_pic',
-  });
-
-  next();
-});
-
 const Post = model('Post', postSchema);
 
 module.exports = Post;

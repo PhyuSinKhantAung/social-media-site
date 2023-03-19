@@ -24,6 +24,7 @@ const commentService = {
 
     return comment;
   },
+
   getAllComments: async (postId) => {
     const post = await Post.findById(postId);
     if (!post) throw POST_ERRORS.POST_NOT_FOUND;
@@ -34,6 +35,7 @@ const commentService = {
     });
     return comments;
   },
+
   updateComment: async (commentId, reqBody, reqUser) => {
     const comment = await Comment.findById(commentId);
     if (!comment) throw COMMENT_ERRORS.COMMENT_NOT_FOUND;
@@ -51,6 +53,7 @@ const commentService = {
 
     return updatedComment;
   },
+
   deleteComment: async (postId, commentId) => {
     const comment = await Comment.findByIdAndDelete(commentId);
     if (!comment) throw COMMENT_ERRORS.COMMENT_NOT_FOUND;
