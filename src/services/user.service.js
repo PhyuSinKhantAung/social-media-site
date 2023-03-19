@@ -1,4 +1,3 @@
-const { ObjectId } = require('mongodb');
 const { BLOCK_USER_ERRORS, USER_ERRORS } = require('../constant');
 
 const User = require('../models/user.model');

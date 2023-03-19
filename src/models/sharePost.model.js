@@ -16,6 +16,13 @@ const shareSchema = new Schema(
       enum: ['PUBLIC', 'FRIEND'],
       default: 'PUBLIC',
     },
+    taggedUserIds: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+        default: [],
+      },
+    ],
   },
   {
     timestamps: true,

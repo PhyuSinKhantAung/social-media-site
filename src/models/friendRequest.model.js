@@ -12,14 +12,6 @@ const friendRequestSchema = new Schema({
   },
 });
 
-// friendRequestSchema.pre(/^find/, function (next) {
-//   this.populate({
-//     path: 'senderId',
-//     select: 'username profile_pic',
-//   });
-//   next();
-// });
-
 const Request = model('Request', friendRequestSchema);
 
 module.exports = Request;

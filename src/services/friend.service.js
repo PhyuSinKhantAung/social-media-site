@@ -78,6 +78,7 @@ const friendService = {
       { new: true, runValidators: true }
     );
   },
+
   cancelRequest: async (senderId, receiverId) => {
     await Request.findOneAndDelete({
       $or: [

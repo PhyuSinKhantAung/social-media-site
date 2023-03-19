@@ -1,4 +1,4 @@
-const route = require('express').Router({ mergeParams: true });
+const route = require('express').Router();
 const friendController = require('../controllers/friend.controller');
 const authenticate = require('../middlewares/authenticate');
 const { validateParams } = require('../middlewares/validation');

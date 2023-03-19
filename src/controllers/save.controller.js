@@ -1,37 +1,34 @@
-// const catchAsync = require('../utilities/catchAsync');
-// const saveService = require('../services/save.service');
+const catchAsync = require('../utilities/catchAsync');
+const saveService = require('../services/save.service');
+const successResponse = require('../utilities/successResponse');
 
-// exports.createSave = catchAsync(async (req, res, next) => {
-//   const savePost = await saveService.createSave(req.user.id, req.params.id);
-//   res.status(200).json({
-//     code: 200,
-//     data: savePost,
-//   });
-// });
+const savePostController = {
+  createSave: catchAsync(async (req, res, next) => {
+    await saveService.createSave(req.params.id, req.user.id);
+    successResponse({
+      res,
+      code: 200,
+      message: 'You saved this post successfully.',
+    });
+  }),
 
-// exports.unsaved = catchAsync(async (req, res, next) => {
-//   const unsavedPost = await saveService.unsaved(req.user.id, req.params.id);
-//   res.status(200).json({
-//     code: 200,
-//     data: unsavedPost,
-//   });
-// });
+  unsaved: catchAsync(async (req, res, next) => {
+    await saveService.unsaved(req.params.id, req.user.id);
+    successResponse({ res, code: 200, message: 'You unsaved this post.' });
+  }),
 
-// exports.getAllSavedPosts = catchAsync(async (req, res, next) => {
-//   const savedPosts = await saveService.getAllSavedPosts(req.user.id);
-//   res.status(200).json({
-//     code: 200,
-//     data: savedPosts,
-//     count: savedPosts.length,
-//   });
-// });
+  getAllSavedPosts: catchAsync(async (req, res, next) => {
+    const savedPosts = await saveService.getAllSavedPosts(req.user.id);
+    successResponse({ res, code: 200, data: savedPosts });
+  }),
 
-// // getSavedPost;
+  getSavedPost: catchAsync(async (req, res, next) => {
+    const savedPost = await saveService.getSavedPost(
+      req.params.id,
+      req.user.id
+    );
+    successResponse({ res, code: 200, data: savedPost });
+  }),
+};
 
-// exports.getSavedPost = catchAsync(async (req, res, next) => {
-//   const savedPosts = await saveService.getSavedPost(req.user.id, req.params.id);
-//   res.status(200).json({
-//     code: 200,
-//     data: savedPosts,
-//   });
-// });
+module.exports = savePostController;

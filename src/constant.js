@@ -117,3 +117,33 @@ exports.FRIEND_REQUEST_ERRORS = {
     message: 'User is not your blocked-list.',
   },
 };
+
+exports.LIKE_ERRORS = {
+  ALREADY_LIKED: {
+    code: 500,
+    message: 'You have already liked this post.',
+  },
+  LIKE_NOT_FOUND: {
+    code: 404,
+    message: 'Like not found.',
+  },
+};
+
+exports.SHARE_POST_ERRORS = {
+  SHARE_POST_NOT_FOUND: {
+    code: 404,
+    message: 'Share post not found.',
+  },
+};
+
+exports.SAVED_POST_ERRORS = {
+  SAVED_POST_NOT_FOUND: {
+    code: 404,
+    message: 'Saved post not found.',
+  },
+
+  ALREADY_SAVED: {
+    code: 500,
+    message: 'You have already saved this post.',
+  },
+};

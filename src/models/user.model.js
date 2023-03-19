@@ -53,14 +53,6 @@ const userSchema = new Schema(
         default: [],
       },
     ],
-    // saves: [
-    //   {
-    //     type: mongoose.Schema.ObjectId,
-    //     ref: 'Post',
-    //     default: [],
-    //   },
-    // ],
-
     active: {
       type: Boolean,
       default: true,
@@ -82,11 +74,6 @@ const userSchema = new Schema(
     timestamps: true,
   }
 );
-
-// userSchema.pre(/^find/, function (next) {
-//   this.populate('saves');
-//   next();
-// });
 
 userSchema.pre('save', async function (next) {
   // if password is modified, gonna hash / if not, will go another middleware

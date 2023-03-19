@@ -1,6 +1,5 @@
 const route = require('express').Router();
 const userController = require('../controllers/user.controller');
-const friendRouter = require('./friend.route');
 const authenticate = require('../middlewares/authenticate');
 const { validateBody, validateParams } = require('../middlewares/validation');
 const { uploadProfilePic } = require('../library/multer');
