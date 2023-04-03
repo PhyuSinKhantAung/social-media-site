@@ -10,12 +10,12 @@ const likeController = {
 
   createlike: catchAsync(async (req, res, next) => {
     await likeService.createlike(req.params.id, req.user.id);
-    successResponse({ res, code: 204 });
+    successResponse({ res, code: 200, message: 'You like it' });
   }),
 
   unlike: catchAsync(async (req, res, next) => {
     await likeService.unlike(req.params.id, req.user.id);
-    successResponse({ res, code: 204 });
+    successResponse({ res, code: 200, message: 'You unlike it' });
   }),
 };
 

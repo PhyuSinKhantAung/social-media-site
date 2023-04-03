@@ -3,12 +3,13 @@ Joi.objectid = require('joi-objectid')(Joi);
 
 const postSchema = {
   idSchema: Joi.object({
-    id: Joi.objectid().required(),
+    id: Joi.objectid(),
+    userId: Joi.objectid(),
   }),
   postSchema: Joi.object({
-    content: Joi.string().max(200),
+    content: Joi.string(),
 
-    images: Joi.array().items(Joi.string().uri()).optional(),
+    images: Joi.array().items(Joi.string().uri()),
 
     taggedUserIds: Joi.array()
       .items(

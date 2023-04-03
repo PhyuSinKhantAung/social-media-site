@@ -10,6 +10,13 @@ route.get('/newsfeed', authenticate, postController.getAllposts);
 route.get('/me', authenticate, postController.getAllMyPosts);
 
 route.get(
+  '/users/:userId',
+  authenticate,
+  validateParams(postSchema.idSchema),
+  postController.getUserAllPosts
+);
+
+route.get(
   '/:id',
   authenticate,
   validateParams(postSchema.idSchema),

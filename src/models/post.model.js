@@ -41,6 +41,13 @@ const postSchema = new Schema(
         default: [],
       },
     ],
+    saves: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+        default: [],
+      },
+    ],
   },
   {
     toJSON: { virtuals: true },

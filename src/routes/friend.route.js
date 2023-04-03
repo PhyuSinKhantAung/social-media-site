@@ -12,7 +12,7 @@ route.post(
 );
 
 route.get(
-  '/friendRequests',
+  '/friendRequests/:userId',
   authenticate,
   friendController.getAllFriendRequests
 );
