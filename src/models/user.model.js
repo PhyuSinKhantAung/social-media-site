@@ -68,6 +68,7 @@ const userSchema = new Schema(
     },
     bio: {
       type: String,
+      default: 'Bio Text',
     },
   },
   {

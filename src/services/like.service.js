@@ -41,12 +41,12 @@ const likeService = {
 
     if (!post) throw POST_ERRORS.POST_NOT_FOUND;
 
-    const isLiked = post.likes.find((id) => id.toString() === userId);
+    const likedId = post.likes.find((id) => id.toString() === userId);
 
-    if (!isLiked) throw LIKE_ERRORS.LIKE_NOT_FOUND;
+    if (!likedId) throw LIKE_ERRORS.LIKE_NOT_FOUND;
 
     await Post.findByIdAndUpdate(postId, {
-      $pull: { likes: isLiked.toString() },
+      $pull: { likes: likedId.toString() },
     });
   },
 };

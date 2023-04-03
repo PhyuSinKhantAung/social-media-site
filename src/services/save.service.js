@@ -1,3 +1,4 @@
+const { ObjectId } = require('mongodb');
 const { POST_ERRORS, SAVED_POST_ERRORS } = require('../constant');
 const Post = require('../models/post.model');
 const Save = require('../models/savedPost.model');
@@ -15,6 +16,17 @@ const saveService = {
       post: postId,
       savedBy: userId,
     });
+
+    await Post.findByIdAndUpdate(
+      postId,
+      {
+        $addToSet: { saves: ObjectId(userId) },
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
   },
 
   unsaved: async (postId, userId) => {
@@ -27,11 +39,22 @@ const saveService = {
       savedBy: userId,
     });
 
+    await Post.findByIdAndUpdate(postId, {
+      $pull: { saves: ObjectId(userId) },
+    });
+
     if (!savedPost) throw SAVED_POST_ERRORS.SAVED_POST_NOT_FOUND;
   },
 
   getAllSavedPosts: async (userId) => {
-    const savedPosts = await Save.find({ savedBy: userId }).populate('post');
+    const savedPosts = await Save.find({ savedBy: userId }).populate({
+      path: 'post',
+      populate: {
+        path: 'post_creator',
+        model: 'User',
+        select: 'username profile_pic',
+      },
+    });
 
     if (!savedPosts) throw SAVED_POST_ERRORS.SAVED_POST_NOT_FOUND;
 
@@ -42,9 +65,14 @@ const saveService = {
     const savedPost = await Save.findOne({
       post: postId,
       savedBy: userId,
-    })
-      .populate('post')
-      .populate({ path: 'savedBy', select: 'username profile_pic' });
+    }).populate({
+      path: 'post',
+      populate: {
+        path: 'post_creator',
+        model: 'User',
+        select: 'username profile_pic',
+      },
+    });
 
     if (!savedPost) throw SAVED_POST_ERRORS.SAVED_POST_NOT_FOUND;
 

@@ -5,7 +5,7 @@ const successResponse = require('../utilities/successResponse');
 const authController = {
   signUpWithEmail: catchAsync(async (req, res, next) => {
     const { user, jwtToken } = await authService.signUpWithEmail(req.body, res);
-    successResponse({ res, code: 200, data: user, token: jwtToken });
+    successResponse({ res, code: 201, data: user, token: jwtToken });
   }),
 
   logInWithEmail: catchAsync(async (req, res, next) => {

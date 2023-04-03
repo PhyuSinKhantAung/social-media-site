@@ -11,7 +11,6 @@ const commentSchema = new Schema({
   commented_postId: {
     type: mongoose.Schema.ObjectId,
     ref: 'Post',
-    select: false,
   },
 });
 

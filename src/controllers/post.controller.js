@@ -12,7 +12,13 @@ const postController = {
     successResponse({ res, code: 200, data: posts });
   }),
 
+  getUserAllPosts: catchAsync(async (req, res, next) => {
+    const posts = await postService.getUserAllPosts(req.params.userId);
+    successResponse({ res, code: 200, data: posts });
+  }),
+
   getPost: catchAsync(async (req, res, next) => {
+    console.log('hello run me please');
     const post = await postService.getPost(req.params.id);
     successResponse({ res, code: 200, data: post });
   }),

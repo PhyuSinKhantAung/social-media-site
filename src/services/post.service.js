@@ -8,26 +8,102 @@ const postService = {
   getAllposts: async (reqUser, reqQuery) => {
     const user = await User.findById(reqUser.id).select('+last_access');
 
-    const allPosts = await Post.find({ createdAt: { $gt: user.last_access } });
+    // const allPosts = await Post.find({
+    //   createdAt: { $gt: user.last_access },
+    // }).populate({ path: 'post_creator', select: 'username profile_pic' });
 
-    const allShares = await Share.find({
-      createdAt: { $gt: user.last_access },
-    });
+    // const allShares = await Share.find({
+    //   createdAt: { $gt: user.last_access },
+    // })
+    //   .populate({ path: 'sharedBy', select: 'username profile_pic' })
+    //   .populate('post');
+    const allPosts = await Post.find()
+      .sort('-createdAt')
+
+      .populate({
+        path: 'post_creator',
+        select: 'username profile_pic',
+      })
+      .populate('comments');
+
+    const allShares = await Share.find()
+      .sort('-createdAt')
+
+      .populate({
+        path: 'post',
+        populate: {
+          path: 'post_creator',
+          model: 'User',
+          select: 'username profile_pic',
+        },
+      })
+      .populate({
+        path: 'sharedBy',
+        select: 'username profile_pic',
+      });
 
     user.last_access = new Date();
     await user.save();
 
     const unseenAllPostsAndShares = [...allShares, ...allPosts];
 
+    unseenAllPostsAndShares.sort();
+
     return unseenAllPostsAndShares;
   },
 
   getAllMyPosts: async (reqUser) => {
-    const allSharedPosts = await Share.find({ sharedBy: reqUser.id });
+    const allSharedPosts = await Share.find({ sharedBy: reqUser.id })
+      .sort('-createdAt')
+      .populate({
+        path: 'post',
+        populate: {
+          path: 'post_creator',
+          model: 'User',
+          select: 'username profile_pic',
+        },
+      })
+      .populate({
+        path: 'sharedBy',
+        select: 'username profile_pic',
+      });
+    const allPosts = await Post.find({ post_creator: reqUser.id })
+      .sort('-createdAt')
+      .populate({
+        path: 'post_creator',
+        select: 'username profile_pic',
+      })
+      .populate('comments');
 
-    const allPosts = await Post.find({ post_creator: reqUser.id }).sort(
-      '-createdAt'
-    );
+    const allPostsAndSharedPosts = [...allSharedPosts, ...allPosts];
+
+    if (!allPostsAndSharedPosts) throw POST_ERRORS.POST_NOT_FOUND;
+
+    return allPostsAndSharedPosts;
+  },
+  getUserAllPosts: async (userId) => {
+    const allSharedPosts = await Share.find({ sharedBy: userId })
+      .sort('-createdAt')
+      .populate({
+        path: 'post',
+        populate: {
+          path: 'post_creator',
+          model: 'User',
+          select: 'username profile_pic',
+        },
+      })
+      .populate({
+        path: 'sharedBy',
+        select: 'username profile_pic',
+      });
+
+    const allPosts = await Post.find({ post_creator: userId })
+      .sort('-createdAt')
+      .populate({
+        path: 'post_creator',
+        select: 'username profile_pic',
+      })
+      .populate('comments');
 
     const allPostsAndSharedPosts = [...allSharedPosts, ...allPosts];
 
@@ -38,6 +114,7 @@ const postService = {
 
   getPost: async (postId) => {
     const post = await Post.findById(postId);
+    console.log('post---->', post);
     if (!post) throw POST_ERRORS.POST_NOT_FOUND;
     return post;
   },
