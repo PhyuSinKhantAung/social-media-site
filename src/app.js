@@ -7,7 +7,6 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const { MONGODB_URI, SESSION_SECRET, NODE_ENV } = require('./constant');
 const router = require('./index');
-const { NotFoundError } = require('./errors');
 const errorHandler = require('./middlewares/errorHandler');
 
 const app = express();
@@ -28,6 +27,12 @@ app.use(
   })
 );
 
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+  next();
+});
 // security
 app.options('*', cors());
 app.use(helmet());
@@ -45,7 +50,7 @@ app.use(express.urlencoded({ extended: true }));
 // routes
 app.use('/api/v1/', router);
 app.use((req, res, next) => {
-  next(new NotFoundError(`Can't find ${req.originalUrl} on this server.`, 404));
+  next({ code: 404, message: `Can't find ${req.originalUrl} on this server.` });
 });
 app.use(errorHandler);
 

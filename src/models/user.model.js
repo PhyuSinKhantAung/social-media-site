@@ -1,15 +1,14 @@
 const { Schema, model, default: mongoose } = require('mongoose');
 
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 const userSchema = new Schema(
   {
-    username: String,
-    email: {
+    username: {
       type: String,
-      unique: true,
     },
-    phone: {
+    email: {
       type: String,
     },
     password: {
@@ -17,7 +16,7 @@ const userSchema = new Schema(
       select: false,
     },
     dob: {
-      type: String,
+      type: Date,
     },
     gender: {
       type: String,
@@ -40,32 +39,36 @@ const userSchema = new Schema(
         default: [],
       },
     ],
-    blocks: [
+    blocked_users: [
       {
         type: mongoose.Schema.ObjectId,
         ref: 'User',
         default: [],
       },
     ],
-    saves: [
+    blockers: [
       {
         type: mongoose.Schema.ObjectId,
-        ref: 'Post',
+        ref: 'User',
         default: [],
       },
     ],
-    otp: {
-      type: String,
-      select: false,
+    active: {
+      type: Boolean,
+      default: true,
     },
     last_access: {
       type: Date,
       default: '1970-01-01 00:00:00',
       select: false,
     },
-    active: {
-      type: Boolean,
-      default: true,
+    passwordChangedAt: {
+      type: String,
+      select: false,
+    },
+    bio: {
+      type: String,
+      default: 'Bio Text',
     },
   },
   {
@@ -73,16 +76,18 @@ const userSchema = new Schema(
   }
 );
 
-userSchema.pre(/^find/, function (next) {
-  this.populate({ path: 'saves', select: 'content images' });
-  next();
-});
-
 userSchema.pre('save', async function (next) {
   // if password is modified, gonna hash / if not, will go another middleware
   if (!this.isModified('password')) return next();
 
   this.password = await bcrypt.hash(this.password, 12);
+  next();
+});
+
+userSchema.pre('save', function (next) {
+  if (!this.isModified('password') || this.isNew) return next();
+
+  this.passwordChangedAt = Date.now();
   next();
 });
 

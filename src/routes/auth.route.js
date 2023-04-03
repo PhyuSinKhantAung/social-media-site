@@ -1,37 +1,31 @@
 const route = require('express').Router();
 const authController = require('../controllers/auth.controller');
-const validation = require('../middlewares/validation');
+const { validateBody } = require('../middlewares/validation');
 const userSchemas = require('../schemas/user.schema');
 
 route.post(
   '/email/signup',
-  validation(userSchemas.signupUserSchema),
+  validateBody(userSchemas.signupUserSchema),
   authController.signUpWithEmail
 );
 
 route.post(
   '/email/login',
-  validation(userSchemas.loginUserSchema),
+  validateBody(userSchemas.loginUserSchema),
   authController.logInWithEmail
 );
 
 route.post(
-  '/phone/signup',
-  validation(userSchemas.signupUserSchema),
-  authController.signUpWithPhone
+  '/forgotpassword',
+  validateBody(userSchemas.forgotPasswordSchema),
+  authController.forgotPassword
 );
-
-route.post('/verify', authController.otpVerification);
 
 route.post(
-  '/phone/login',
-  validation(userSchemas.loginUserSchema),
-  authController.logInWithPhone
+  '/resetpassword',
+  validateBody(userSchemas.resetPasswordSchema),
+  authController.resetPassword
 );
-
-route.post('/verify/login', authController.otpVerificationLogin);
-
-route.get('/resend', authController.resendOtp);
 
 route.get('/logout', authController.logout);
 

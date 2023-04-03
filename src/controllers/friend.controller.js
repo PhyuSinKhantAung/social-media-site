@@ -1,92 +1,63 @@
 const catchAsync = require('../utilities/catchAsync');
 const friendService = require('../services/friend.service');
+const successResponse = require('../utilities/successResponse');
 
-exports.addFriend = catchAsync(async (req, res, next) => {
-  const addedFriendInfo = await friendService.addFriend(
-    req.params.id,
-    req.user.id
-  );
-  res.status(200).json({
-    code: 200,
-    data: addedFriendInfo,
-  });
-});
+const friendController = {
+  addFriend: catchAsync(async (req, res, next) => {
+    await friendService.addFriend(req.params.id, req.user.id);
+    successResponse({ res, code: 200, message: 'You send a request!' });
+  }),
 
-exports.getAllFriendRequests = catchAsync(async (req, res, next) => {
-  const friendRequests = await friendService.getAllFriendRequests(req.user.id);
-  res.status(200).json({
-    code: 200,
-    data: friendRequests,
-  });
-});
+  getAllFriendRequests: catchAsync(async (req, res, next) => {
+    const friendRequests = await friendService.getAllFriendRequests(
+      req.params.userId
+    );
+    successResponse({ res, code: 200, data: friendRequests });
+  }),
 
-exports.confirmFriend = catchAsync(async (req, res, next) => {
-  const confirmFriend = await friendService.confirmFriend(
-    req.params.id,
-    req.user.id
-  );
-  res.status(200).json({
-    code: 200,
-    data: confirmFriend,
-  });
-});
+  confirmFriend: catchAsync(async (req, res, next) => {
+    console.log('hello');
+    await friendService.confirmFriend(req.params.id, req.user.id);
+    successResponse({ res, code: 200, message: 'You comfirm it!' });
+  }),
 
-exports.cancelRequest = catchAsync(async (req, res, next) => {
-  await friendService.cancelRequest(req.params.id, req.user.id);
-  res.status(200).json({
-    code: 200,
-    data: null,
-    message: 'You cancelled this request.',
-  });
-});
+  cancelRequest: catchAsync(async (req, res, next) => {
+    await friendService.cancelRequest(req.params.id, req.user.id);
+    successResponse({ res, code: 200, message: 'You cancel it!' });
+  }),
 
-exports.unfriend = catchAsync(async (req, res, next) => {
-  const unfriend = await friendService.unfriend(req.params.id, req.user.id);
-  res.status(200).json({
-    code: 200,
-    data: unfriend,
-  });
-});
+  unfriend: catchAsync(async (req, res, next) => {
+    await friendService.unfriend(req.params.id, req.user.id);
+    successResponse({ res, code: 200, message: 'You unfriend it!' });
+  }),
 
-exports.blockFriend = catchAsync(async (req, res, next) => {
-  const friend = await friendService.blockFriend(req.params.id, req.user.id);
-  res.status(200).json({
-    code: 200,
-    data: friend,
-  });
-});
+  blockUser: catchAsync(async (req, res, next) => {
+    await friendService.blockUser(req.params.id, req.user.id);
+    successResponse({ res, code: 200, message: 'You blocked it!' });
+  }),
 
-exports.unblockFriend = catchAsync(async (req, res, next) => {
-  const unblockFriend = await friendService.unblock(req.params.id, req.user.id);
-  res.status(200).json({
-    code: 200,
-    data: unblockFriend,
-  });
-});
+  unblockUser: catchAsync(async (req, res, next) => {
+    await friendService.unblockUser(req.params.id, req.user.id);
+    successResponse({ res, code: 204 });
+  }),
 
-exports.getAllFriends = catchAsync(async (req, res, next) => {
-  const friends = await friendService.getAllFriends(req.user.id);
-  res.status(200).json({
-    code: 200,
-    data: friends,
-  });
-});
+  getAllFriends: catchAsync(async (req, res, next) => {
+    const friends = await friendService.getAllFriends(req.user.id);
+    successResponse({ res, code: 200, data: friends });
+  }),
 
-exports.getAllBlocks = catchAsync(async (req, res, next) => {
-  const blocks = await friendService.getAllBlocks(req.user.id);
-  res.status(200).json({
-    code: 200,
-    data: blocks,
-  });
-});
+  getAllBlockedUsers: catchAsync(async (req, res, next) => {
+    const blockedUsers = await friendService.getAllBlockedUsers(req.user.id);
+    successResponse({ res, code: 200, data: blockedUsers });
+  }),
 
-exports.getMutualFriends = catchAsync(async (req, res, next) => {
-  const mutualFriends = await friendService.getMutualFriends(
-    req.user.id,
-    req.params.id
-  );
-  res.status(200).json({
-    code: 200,
-    data: mutualFriends,
-  });
-});
+  getMutualFriends: catchAsync(async (req, res, next) => {
+    const mutualFriends = await friendService.getMutualFriends(
+      req.params.id,
+      req.user.id
+    );
+    successResponse({ res, code: 200, data: mutualFriends });
+  }),
+};
+
+module.exports = friendController;

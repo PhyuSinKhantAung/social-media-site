@@ -16,19 +16,26 @@ const shareSchema = new Schema(
       enum: ['PUBLIC', 'FRIEND'],
       default: 'PUBLIC',
     },
+    taggedUserIds: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+        default: [],
+      },
+    ],
   },
   {
     timestamps: true,
   }
 );
 
-shareSchema.pre(/^find/, function (next) {
-  this.populate('post').populate({
-    path: 'sharedBy',
-    select: 'username profile_pic',
-  });
-  next();
-});
+// shareSchema.pre(/^find/, function (next) {
+//   this.populate('post').populate({
+//     path: 'sharedBy',
+//     select: 'username profile_pic',
+//   });
+//   next();
+// });
 
 const Share = model('Share', shareSchema);
 

@@ -1,74 +1,60 @@
-const {
-  ApiError,
-  BadRequestError,
-  UnauthenticatedError,
-} = require('../errors');
+const { BLOCK_USER_ERRORS, USER_ERRORS } = require('../constant');
+
 const User = require('../models/user.model');
 
 const userService = {
-  getAllUsers: async () => {
-    const users = await User.find();
-    return users;
+  getAllUsers: async (reqQuery, ownId) => {
+    const queryObj = { ...reqQuery };
+
+    if (queryObj.username) {
+      queryObj.username = { $regex: queryObj.username, $options: 'i' };
+    }
+
+    const users = await User.find(queryObj);
+
+    const filteredBlockedUsers = users.filter((user) =>
+      user.blocked_users.every(
+        (blockedUserId) => blockedUserId.toString() !== ownId
+      )
+    );
+    const filteredBlockers = filteredBlockedUsers.filter((user) =>
+      user.blockers.every((blockerId) => blockerId.toString() !== ownId)
+    );
+
+    return filteredBlockers;
   },
 
-  getUser: async (userId, ownId) => {
+  getUserById: async (userId, ownId) => {
     const user = await User.findById(userId);
 
-    if (!user) throw new BadRequestError('There is no user with that id.', 400);
+    if (!user) throw USER_ERRORS.USER_NOT_FOUND;
 
-    if (user.active === false)
-      throw new BadRequestError('This user is not available right now.', 400);
+    if (user.active === false) throw USER_ERRORS.USER_NOT_FOUND;
 
-    if (user.blocks.find((blockedId) => blockedId.toString() === ownId))
-      throw new ApiError('You have been blocked by this user.', 401);
+    if (user.blocked_users.find((blockedId) => blockedId.toString() === ownId))
+      throw BLOCK_USER_ERRORS.USER_NOT_FOUND;
 
     return user;
   },
 
-  getMe: async (userId) => {
-    const user = await User.findById(userId);
-    if (!user) throw new BadRequestError('There is no user with that id', 400);
-    return user;
-  },
-
-  updateMe: async (userId, reqBody, profilePic) => {
-    if (!(await User.findById(userId)))
-      throw new BadRequestError('There is no user with that id', 400);
-
-    if (reqBody.password)
-      throw new BadRequestError(
-        'You cannot update password on this route',
-        400
-      );
+  updateMe: async (myId, reqBody, profilePic) => {
+    if (!(await User.findById(myId))) throw USER_ERRORS.USER_NOT_FOUND;
 
     if (profilePic)
       reqBody.profile_pic = {
         url: profilePic.path,
       };
 
-    const updatedUser = await User.findByIdAndUpdate(userId, reqBody, {
+    const updatedUser = await User.findByIdAndUpdate(myId, reqBody, {
       new: true,
     });
     return updatedUser;
   },
 
-  deactivateMe: async (userId, res) => {
-    if (!(await User.findById(userId)))
-      throw new BadRequestError('There is no user with that id', 400);
+  deactivateMe: async (myId, res) => {
+    if (!(await User.findById(myId))) throw USER_ERRORS.USER_NOT_FOUND;
 
-    await User.findByIdAndUpdate(userId, { active: false });
-
-    res.cookie('jwt', 'loggedout', {
-      expires: new Date(Date.now() + 10 * 1000),
-      httpOnly: true,
-    });
-  },
-
-  deleteMe: async (userId, res) => {
-    if (!(await User.findById(userId)))
-      throw new BadRequestError('There is no user with that id', 400);
-
-    await User.findByIdAndDelete(userId);
+    await User.findByIdAndUpdate(myId, { active: false });
 
     res.cookie('jwt', 'loggedout', {
       expires: new Date(Date.now() + 10 * 1000),

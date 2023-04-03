@@ -2,14 +2,31 @@ const { Schema, model, default: mongoose } = require('mongoose');
 
 const postSchema = new Schema(
   {
+    post_creator: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User',
+    },
     content: {
       type: String,
     },
     images: [
       {
         url: String,
+        public_id: String,
       },
     ],
+    taggedUserIds: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+        default: [],
+      },
+    ],
+    audience: {
+      type: String,
+      enum: ['PUBLIC', 'FRIEND'],
+      default: 'PUBLIC',
+    },
     likes: [
       {
         type: mongoose.Schema.ObjectId,
@@ -19,30 +36,18 @@ const postSchema = new Schema(
     ],
     comments: [
       {
-        commented_by: {
-          type: mongoose.Schema.ObjectId,
-          ref: 'User',
-        },
-        text: String,
+        type: mongoose.Schema.ObjectId,
+        ref: 'Comment',
+        default: [],
       },
     ],
-
-    taggedUserIds: [
+    saves: [
       {
         type: mongoose.Schema.ObjectId,
         ref: 'User',
         default: [],
       },
     ],
-    user: {
-      type: mongoose.Schema.ObjectId,
-      ref: 'User',
-    },
-    audience: {
-      type: String,
-      enum: ['PUBLIC', 'FRIEND'],
-      default: 'PUBLIC',
-    },
   },
   {
     toJSON: { virtuals: true },
@@ -61,23 +66,10 @@ postSchema.virtual('like_count').get(function () {
 
 postSchema.pre('save', function (next) {
   if (this.isNew) next();
+
   this.comment_count = this.comments.length;
   this.like_count = this.likes.length;
-
   return next;
-});
-
-postSchema.pre(/^find/, function (next) {
-  this.populate({ path: 'user', select: 'username profile_pic' })
-    .populate({
-      path: 'taggedUserIds',
-      select: 'username profile_pic',
-    })
-    .populate({
-      path: 'comments.commented_by',
-      select: 'username profile_pic',
-    });
-  next();
 });
 
 const Post = model('Post', postSchema);

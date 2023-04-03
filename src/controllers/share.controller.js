@@ -1,44 +1,44 @@
 const catchAsync = require('../utilities/catchAsync');
 const shareService = require('../services/share.service');
+const successResponse = require('../utilities/successResponse');
 
-exports.createShare = catchAsync(async (req, res, next) => {
-  const sharedPost = await shareService.createShare(
-    req.params.id,
-    req.user.id,
-    req.body
-  );
-  res.status(200).json({
-    code: 200,
-    data: sharedPost,
-  });
-});
+const shareController = {
+  createShare: catchAsync(async (req, res, next) => {
+    await shareService.createShare(req.params.id, req.user.id, req.body);
+    successResponse({
+      res,
+      code: 200,
+      data: null,
+      message: 'You shared this post successfully.',
+    });
+  }),
 
-exports.updateShare = catchAsync(async (req, res, next) => {
-  const updatedSharePost = await shareService.updateShare(
-    req.params.id,
-    req.body
-  );
-  res.status(200).json({
-    code: 200,
-    data: updatedSharePost,
-  });
-});
+  updateShare: catchAsync(async (req, res, next) => {
+    const updatedSharePost = await shareService.updateShare(
+      req.params.id,
+      req.user.id,
+      req.body
+    );
+    successResponse({
+      res,
+      code: 200,
+      data: updatedSharePost,
+    });
+  }),
 
-exports.deleteShare = catchAsync(async (req, res, next) => {
-  await shareService.deleteShare(req.params.id);
-  res.status(200).json({
-    code: 200,
-    data: null,
-  });
-});
+  deleteShare: catchAsync(async (req, res, next) => {
+    await shareService.deleteShare(req.params.id, req.user.id);
+    successResponse({ res, code: 200, data: null });
+  }),
 
-exports.getSharedPost = catchAsync(async (req, res, next) => {
-  const sharedPost = await shareService.getSharedPost(
-    req.params.id,
-    req.user.id
-  );
-  res.status(200).json({
-    code: 200,
-    data: sharedPost,
-  });
-});
+  getSharedPost: catchAsync(async (req, res, next) => {
+    const sharedPost = await shareService.getSharedPost(req.params.id);
+    successResponse({
+      res,
+      code: 200,
+      data: sharedPost,
+    });
+  }),
+};
+
+module.exports = shareController;

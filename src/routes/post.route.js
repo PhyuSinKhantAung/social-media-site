@@ -2,23 +2,37 @@ const route = require('express').Router();
 const postController = require('../controllers/post.controller');
 const authenticate = require('../middlewares/authenticate');
 const { uploadImages } = require('../library/multer');
-const validation = require('../middlewares/validation');
+const { validateBody, validateParams } = require('../middlewares/validation');
 const postSchema = require('../schemas/post.schema');
-const commentRoute = require('./comment.route');
-const likeRoute = require('./like.route');
-const shareRoute = require('./share.route');
-const saveRoute = require('./save.route');
 
 route.get('/newsfeed', authenticate, postController.getAllposts);
+
 route.get('/me', authenticate, postController.getAllMyPosts);
 
-route.get('/:id', authenticate, postController.getPost);
-route.delete('/:id', authenticate, postController.deletePost);
+route.get(
+  '/users/:userId',
+  authenticate,
+  validateParams(postSchema.idSchema),
+  postController.getUserAllPosts
+);
+
+route.get(
+  '/:id',
+  authenticate,
+  validateParams(postSchema.idSchema),
+  postController.getPost
+);
+route.delete(
+  '/:id',
+  authenticate,
+  validateParams(postSchema.idSchema),
+  postController.deletePost
+);
 
 route.post(
   '/',
   authenticate,
-  validation(postSchema.createPostSchema),
+  validateBody(postSchema.postSchema),
   uploadImages,
   postController.createPost
 );
@@ -26,29 +40,19 @@ route.post(
 route.patch(
   '/:id',
   authenticate,
-  validation(postSchema.createPostSchema),
+  validateParams(postSchema.idSchema),
+  validateBody(postSchema.postSchema),
   uploadImages,
   postController.updatePost
 );
 
-route.put(
-  '/:id',
+route.delete(
+  '/images/:id',
   authenticate,
-  validation(postSchema.deletedImageSchema),
+  validateParams(postSchema.idSchema),
+  validateBody(postSchema.deletedImageSchema),
   uploadImages,
   postController.deleteImages
 );
-
-// comments
-route.use('/:id/comments', commentRoute);
-
-// likes
-route.use('/:id/likes', likeRoute);
-
-// shares
-route.use('/:id/share', shareRoute);
-
-// saves
-route.use('/:id/save', saveRoute);
 
 module.exports = route;

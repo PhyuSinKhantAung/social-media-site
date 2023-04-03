@@ -1,16 +1,13 @@
 const Joi = require('joi');
 Joi.objectid = require('joi-objectid')(Joi);
 
-const postSchema = {
+const sharePostSchema = {
   idSchema: Joi.object({
-    id: Joi.objectid(),
-    userId: Joi.objectid(),
+    id: Joi.objectid().required(),
   }),
-  postSchema: Joi.object({
-    content: Joi.string(),
 
-    images: Joi.array().items(Joi.string().uri()),
-
+  sharePost: Joi.object({
+    caption: Joi.string(),
     taggedUserIds: Joi.array()
       .items(
         Joi.string()
@@ -24,14 +21,6 @@ const postSchema = {
 
     audience: Joi.string().valid('PUBLIC', 'FRIENDS'),
   }),
-  deletedImageSchema: Joi.object({
-    deletedImages: Joi.array()
-      .items(Joi.objectid())
-      .unique()
-      .optional()
-      .required()
-      .messages({ 'array.unique': 'You cannot delete duplicate image id.' }),
-  }),
 };
 
-module.exports = postSchema;
+module.exports = sharePostSchema;

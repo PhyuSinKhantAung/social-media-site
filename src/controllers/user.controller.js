@@ -1,56 +1,35 @@
 const userService = require('../services/user.service');
 const catchAsync = require('../utilities/catchAsync');
+const successResponse = require('../utilities/successResponse');
 
-exports.getAllUsers = catchAsync(async (req, res, next) => {
-  const users = await userService.getAllUsers();
-  res.status(200).json({
-    code: 200,
-    data: users,
-    count: users.length,
-  });
-});
+const userController = {
+  getAllUsers: catchAsync(async (req, res, next) => {
+    const users = await userService.getAllUsers(req.query, req.user.id);
+    successResponse({ res, code: 200, data: users });
+  }),
 
-exports.getUser = catchAsync(async (req, res, next) => {
-  const user = await userService.getUser(req.params.id, req.user.id);
-  res.status(200).json({
-    code: 200,
-    data: user,
-  });
-});
+  getUserById: catchAsync(async (req, res, next) => {
+    const user = await userService.getUserById(req.params.id, req.user.id);
+    successResponse({ res, code: 200, data: user });
+  }),
 
-exports.getMe = catchAsync(async (req, res, next) => {
-  const user = await userService.getMe(req.user.id);
-  res.status(200).json({
-    code: 200,
-    data: user,
-  });
-});
+  getMe: catchAsync(async (req, res, next) => {
+    successResponse({ res, code: 200, data: req.user });
+  }),
 
-exports.updateMe = catchAsync(async (req, res, next) => {
-  const updatedUser = await userService.updateMe(
-    req.user.id,
-    req.body,
-    req.file
-  );
-  res.status(200).json({
-    code: 200,
-    data: updatedUser,
-  });
-});
+  updateMe: catchAsync(async (req, res, next) => {
+    const updatedUser = await userService.updateMe(
+      req.user.id,
+      req.body,
+      req.file
+    );
+    successResponse({ res, code: 200, data: updatedUser });
+  }),
 
-exports.deactivateMe = catchAsync(async (req, res, next) => {
-  await userService.deactivateMe(req.user.id, res);
-  res.status(200).json({
-    code: 200,
-    data: null,
-    message: 'Deactivated successfully.',
-  });
-});
+  deactivateMe: catchAsync(async (req, res, next) => {
+    await userService.deactivateMe(req.user.id, res);
+    successResponse({ res, code: 200, data: null });
+  }),
+};
 
-exports.deleteMe = catchAsync(async (req, res, next) => {
-  await userService.deleteMe(req.user.id, res);
-  res.status(200).json({
-    code: 200,
-    data: null,
-  });
-});
+module.exports = userController;

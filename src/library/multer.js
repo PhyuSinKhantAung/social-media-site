@@ -1,7 +1,6 @@
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
 const cloudinary = require('./cloudinaryConfig');
-const { ApiError } = require('../errors');
 
 const storage = new CloudinaryStorage({
   cloudinary,
@@ -18,7 +17,14 @@ const storage = new CloudinaryStorage({
 
 const fileFilter = (req, file, cb) => {
   if (file.mimetype.startsWith('image')) cb(null, true);
-  else cb(new ApiError('You cannot add this kind of file type.', 400), false);
+  else
+    cb(
+      new Error({
+        code: 400,
+        message: 'You cannot add this kind of file type',
+      }),
+      false
+    );
 };
 
 const upload = multer({
@@ -30,6 +36,7 @@ const upload = multer({
 });
 
 const uploadImages = upload.array('images', 10);
+
 const uploadProfilePic = upload.single('profile_pic');
 
 // const uploadImages = upload.fields([{ name: 'images', maxCount: 15 }]);

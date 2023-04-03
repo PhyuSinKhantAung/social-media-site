@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = require('../constant');
-const { ApiError } = require('../errors');
 const catchAsync = require('../utilities/catchAsync');
 const User = require('../models/user.model');
+const { USER_ERRORS } = require('../constant');
 
 const authenticate = catchAsync(async (req, res, next) => {
   let token;
@@ -16,17 +16,12 @@ const authenticate = catchAsync(async (req, res, next) => {
   } else if (req.cookies.jwt) {
     token = req.cookies.jwt;
   }
-  if (!token)
-    throw new ApiError(
-      'You are not logged in. Please login to get access.',
-      401
-    );
+  if (!token) throw USER_ERRORS.NOT_AUTHENTICATED;
 
   try {
     const payload = jwt.verify(token, JWT_SECRET);
     const user = await User.findById(payload.id);
-    if (!user)
-      throw new ApiError('User belong to this id does not exist.', 400);
+    if (!user) throw USER_ERRORS.USER_NOT_FOUND;
     req.user = user;
     next();
   } catch (err) {
