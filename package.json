@@ -4,9 +4,8 @@
   "description": "My solo api project",
   "main": "src/server.js",
   "scripts": {
-    "dev": "nodemon ./src/server.js",
-    "prod": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./src/server.js"
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js"
   },
   "repository": {
     "type": "git",
