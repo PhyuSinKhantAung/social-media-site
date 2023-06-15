@@ -2,7 +2,7 @@
   "name": "social-media-site",
   "version": "1.0.0",
   "description": "My solo api project",
-  "main": "index.js",
+  "main": "src/server.js",
   "scripts": {
     "dev": "nodemon ./src/server.js",
     "prod": "echo \"Error: no test specified\" && exit 1",
