@@ -15,18 +15,6 @@ route.post(
   authController.logInWithEmail
 );
 
-route.post(
-  '/forgotpassword',
-  validateBody(userSchemas.forgotPasswordSchema),
-  authController.forgotPassword
-);
-
-route.post(
-  '/resetpassword',
-  validateBody(userSchemas.resetPasswordSchema),
-  authController.resetPassword
-);
-
-route.get('/logout', authController.logout);
+route.post('/logout', authController.logout);
 
 module.exports = route;

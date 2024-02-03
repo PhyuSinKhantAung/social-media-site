@@ -4,11 +4,15 @@ const successResponse = require('../utilities/successResponse');
 
 const shareController = {
   createShare: catchAsync(async (req, res, next) => {
-    await shareService.createShare(req.params.id, req.user.id, req.body);
+    const sharedPost = await shareService.createShare(
+      req.params.id,
+      req.user.id,
+      req.body
+    );
     successResponse({
       res,
       code: 200,
-      data: null,
+      data: sharedPost,
       message: 'You shared this post successfully.',
     });
   }),

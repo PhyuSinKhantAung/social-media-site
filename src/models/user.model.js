@@ -10,6 +10,7 @@ const userSchema = new Schema(
     },
     email: {
       type: String,
+      unique: true,
     },
     password: {
       type: String,
@@ -59,7 +60,7 @@ const userSchema = new Schema(
     },
     last_access: {
       type: Date,
-      default: '1970-01-01 00:00:00',
+      default: '',
       select: false,
     },
     passwordChangedAt: {
@@ -68,7 +69,7 @@ const userSchema = new Schema(
     },
     bio: {
       type: String,
-      default: 'Bio Text',
+      default: '',
     },
   },
   {

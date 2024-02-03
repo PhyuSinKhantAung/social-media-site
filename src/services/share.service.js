@@ -9,7 +9,7 @@ const shareService = {
 
     if (!post) throw POST_ERRORS.POST_NOT_FOUND;
 
-    await Share.create({
+    return await Share.create({
       ...reqBody,
       post: ObjectId(postId),
       sharedBy: ObjectId(userId),
