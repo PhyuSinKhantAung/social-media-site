@@ -6,10 +6,6 @@ const validateBody = (schema) => (req, res, next) => {
     errors: { label: 'key', wrap: { label: false } },
   });
 
-  // console.log(error);
-  // const errMsg = error.details.map((i) => i.message).join(',');
-  // console.log(errMsg);
-
   if (error) {
     return res.status(400).json({
       code: 400,
@@ -34,7 +30,6 @@ const validateParams = (schema) => (req, res, next) => {
     });
   }
   next();
-  console.log('it run me');
 };
 
 module.exports = { validateBody, validateParams };

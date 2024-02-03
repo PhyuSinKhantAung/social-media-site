@@ -8,25 +8,11 @@ const postService = {
   getAllposts: async (reqUser, reqQuery) => {
     const user = await User.findById(reqUser.id).select('+last_access');
 
-    // const allPosts = await Post.find({
-    //   createdAt: { $gt: user.last_access },
-    // }).populate({ path: 'post_creator', select: 'username profile_pic' });
+    const allPosts = await Post.find({
+      createdAt: { $gt: user.last_access },
+    }).populate({ path: 'post_creator', select: 'username profile_pic' });
 
-    // const allShares = await Share.find({
-    //   createdAt: { $gt: user.last_access },
-    // })
-    //   .populate({ path: 'sharedBy', select: 'username profile_pic' })
-    //   .populate('post');
-    const allPosts = await Post.find()
-      .sort('-createdAt')
-
-      .populate({
-        path: 'post_creator',
-        select: 'username profile_pic',
-      })
-      .populate('comments');
-
-    const allShares = await Share.find()
+    const allShares = await Share.find({ createdAt: { $gt: user.last_access } })
       .sort('-createdAt')
 
       .populate({
@@ -114,7 +100,6 @@ const postService = {
 
   getPost: async (postId) => {
     const post = await Post.findById(postId);
-    console.log('post---->', post);
     if (!post) throw POST_ERRORS.POST_NOT_FOUND;
     return post;
   },

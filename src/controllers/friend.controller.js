@@ -16,7 +16,6 @@ const friendController = {
   }),
 
   confirmFriend: catchAsync(async (req, res, next) => {
-    console.log('hello');
     await friendService.confirmFriend(req.params.id, req.user.id);
     successResponse({ res, code: 200, message: 'You comfirm it!' });
   }),
